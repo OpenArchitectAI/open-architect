@@ -9,8 +9,10 @@ from typing import Any, Union, List
 from openai import OpenAI
 import time
 import json
+import os 
 
 OPENAI_API_KEY = ""
+os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
 
 
 class Ticket(BaseModel):
@@ -43,15 +45,17 @@ def architect_agent(architectAgentRequest: ArchitectAgentRequest):
     def run_conversation():
 
         messages = [
-            {
-                "role": "system",
-                "content": f"""You are a principal software engineer who is responsible for mentoring engineers and breaking down tasks into smaller tickets. You want to first ask the user several probing questions to better understand the feature that they are trying to build.  
+            {"role": "system", "content": f"""
+             You are a principal software engineer who is responsible for mentoring engineers and breaking down tasks into smaller tickets. You want to first ask the user several probing questions to better understand the feature that they are trying to build.  
              
-            Ask them questions to better explain different aspects of the feature that they are asking for.  You have been asked to break down a task into smaller tickets and then create those tickets. You have been given the following task: {architectAgentRequest.question}.""",
-            },
-            {"role": "user", "content": architectAgentRequest.question},
-        ]
-
+            Ask them questions to better explain different aspects of the feature that they are asking for. 
+             
+            First ask them in detail what they want to build.  You MUST first clarify the project requirements and ask them to provide a detailed description of the project. DO NOT create tickets until you have a clear understanding of the project requirements.
+             
+            Ask them 3-4 clarifying questions for more details about any necessary backend, front end and hosting components of the project.
+             
+            Once you know all of the details of the project in order to execute exactly what the user wants, you can then break down the task into smaller tickets and then create those tickets. You have been given the following task: {architectAgentRequest.question}."""},
+            {"role": "user", "content": architectAgentRequest.question}]
         tools = [
             {
                 "type": "function",
@@ -80,14 +84,12 @@ def architect_agent(architectAgentRequest: ArchitectAgentRequest):
             tool_choice="auto",
         )
         afterFunctionCall = time.time()
-        print("Time to function call: " + str(afterFunctionCall - beforeFunctionCall))
 
         response_message = response.choices[0].message
         tool_calls = response_message.tool_calls
         function_request_mapping = {
             "create_tickets": CreateTicketsRequest(
-                question=architectAgentRequest.question,
-                history=architectAgentRequest.history,
+                tickets = [Ticket(title="Title", description="Description") for i in range(3)]
             ),
             "create_subtasks": CreateSubtasksRequest(
                 question=architectAgentRequest.question,
@@ -104,13 +106,13 @@ def architect_agent(architectAgentRequest: ArchitectAgentRequest):
 
             for tool_call in tool_calls:
                 function_name = tool_call.function.name
-                print("FUNCTION NAME: " + str(function_name))
                 function_to_call = available_functions[function_name]
-                print("FUNCTION TO CALL: " + str(function_to_call))
                 function_args = function_request_mapping[function_name]
-                print("FUNCTION ARGS: " + str(function_args))
 
             return function_to_call(function_args)
+        else:
+            print("returning message: " + str(response_message.content))
+            return response_message.content
 
     return run_conversation()
 
@@ -158,16 +160,16 @@ def create_subtasks(project_description):
     """
     try:
         client = OpenAI(api_key=OPENAI_API_KEY)
-        questionPrompt = f"""Given the following project description {project_description}, please break it down into smaller tasks that can be accomplished to complete the project. Each task should include a title and a detailed description of the task. The subtasks should all be small enough to be completed in a single day and should represent a micro chunk of work that a user can do to build up to solving the overall task. The response should be in the following format
+        questionPrompt = f"""Given the following project description {project_description}, please break it down into smaller tasks that can be accomplished to complete the project. Each task should include a title and a detailed description of the task. The subtasks should all be small enough to be completed in a single day and should represent a micro chunk of work that a user can do to build up to solving the overall task. Focus only on engineering tasks, don't include design or user testing etc. The response should be in the following format
         
-        Brief description of the task and breakdown - 
+        Brief description of the task and breakdown. Don't include 'Title of the task' in the output, replace it with the actual title - 
         
-        1. SubTask 1: Title of the task
-            Brief description of the task
-        2. SubTask 2: Title of the task
-            Brief description of the task
-        3. SubTask 3: Title of the task
-            Brief description of the task
+        1. Title of the task
+            Detailed description of the task with a breakdown of the steps that need to be taken to complete the task
+        2. Title of the task
+            Detailed description of the task with a breakdown of the steps that need to be taken to complete the task
+        3. Title of the task
+            Detailed description of the task with a breakdown of the steps that need to be taken to complete the task
         """
 
         response = client.chat.completions.create(

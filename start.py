@@ -59,7 +59,7 @@ reviewer = Reviewer(
         trello_helper=trello_helper,
     )
 
-chat_interface.open_architect(trello_helper, gh_helper)
+chat_interface.open_architect(trello_helper, gh_helper_intern)
 
 while True:
     # Console interface/Chat with

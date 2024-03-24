@@ -166,8 +166,7 @@ def create_subtasks(project_description):
             messages=[
                 {"role": "system", "content": "You are a senior staff engineer, who is responsible for breaking up large complex tasks into small, granular subtasks that more junior engineers can easily work through and execute on."},
                 {"role": "user", "content": questionPrompt},
-            ],
-            response_format={ "type": "json_object" }
+            ]
         )
         subtasks = response.choices[0].message.content
 

@@ -49,13 +49,11 @@ def architect_agent(architectAgentRequest: ArchitectAgentRequest):
              
             First ask them in detail what they want to build.  You MUST first clarify the project requirements and ask them to provide a detailed description of the project. DO NOT create tickets until you have a clear understanding of the project requirements.
              
-            Ask them 3-4 clarifying questions for more details about any necessary backend, front end and hosting components of the project.
-             
             Once you know all of the details of the project, you can then break down the task into smaller tickets and then create those tickets. 
             
-            After you have all the subtasks you must ask the user if the subtasks are good and then proceed to creating the tasks. 
+            After you have all the subtasks proceed to creating the tasks - "Here are the subtasks that I have created for this task - are we good to create the tasks?". 
              
-            Create the tasks for the user. 
+            Create the tasks for the user. - "Creating your tasks".
              
             You have been given the following task: {architectAgentRequest.question}."""},
             {"role": "user", "content": architectAgentRequest.question}]
@@ -72,7 +70,7 @@ def architect_agent(architectAgentRequest: ArchitectAgentRequest):
             {
                 "type": "function",
                 "function": {
-                    "name": "create_tickets",
+                    "name": "create_tasks",
                     "description": "When the user asks to create tasks or create tickets in trello, call create tickets. Create tickets based on the subtasks that are generated for the task.  This will actually take the subtasks generated and create the trello tickets for them.",
                     "parameters": {"type": "object", "properties": {}, "required": []},
                 },
@@ -91,7 +89,7 @@ def architect_agent(architectAgentRequest: ArchitectAgentRequest):
         response_message = response.choices[0].message
         tool_calls = response_message.tool_calls
         function_request_mapping = {
-            "create_tickets": CreateTicketsRequest(
+            "create_tasks": CreateTicketsRequest(
                 question=architectAgentRequest.question,
                 history=architectAgentRequest.history,
                 trello_client=architectAgentRequest.trello_client,
@@ -104,7 +102,7 @@ def architect_agent(architectAgentRequest: ArchitectAgentRequest):
 
         if tool_calls:
             available_functions = {
-                "create_tickets": create_tickets,
+                "create_tasks": create_tasks,
                 "create_subtasks": create_subtasks,
             }
             messages.append(response_message)
@@ -126,7 +124,7 @@ def architect_agent(architectAgentRequest: ArchitectAgentRequest):
 
 
 
-def create_tickets(createTicketsRequest: CreateTicketsRequest):
+def create_tasks(createTicketsRequest: CreateTicketsRequest):
     """
         This function will be responsible for creating multiple tickets in parallel.
     """

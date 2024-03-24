@@ -16,7 +16,6 @@ OPENAI_API_KEY = ""
 os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
 
 
-
 class ArchitectAgentRequest(BaseModel):
     question: str
     history: Any
@@ -52,9 +51,11 @@ def architect_agent(architectAgentRequest: ArchitectAgentRequest):
              
             Ask them 3-4 clarifying questions for more details about any necessary backend, front end and hosting components of the project.
              
-            Once you know all of the details of the project in order to execute exactly what the user wants, you can then break down the task into smaller tickets and then create those tickets. 
+            Once you know all of the details of the project, you can then break down the task into smaller tickets and then create those tickets. 
             
-            After you have all the subtasks you must ask the user if the subtasks are good and then proceed to creating the tasks. Don't end the conversation without asking to create the tasks and creating the tasks.
+            After you have all the subtasks you must ask the user if the subtasks are good and then proceed to creating the tasks. 
+             
+            Create the tasks for the user. 
              
             You have been given the following task: {architectAgentRequest.question}."""},
             {"role": "user", "content": architectAgentRequest.question}]
@@ -72,7 +73,7 @@ def architect_agent(architectAgentRequest: ArchitectAgentRequest):
                 "type": "function",
                 "function": {
                     "name": "create_tickets",
-                    "description": "Create tickets based on the subtasks that are generated for the task.  This will actually take the subtasks generated and create the trello tickets for them.",
+                    "description": "When the user asks to create tasks or create tickets in trello, call create tickets. Create tickets based on the subtasks that are generated for the task.  This will actually take the subtasks generated and create the trello tickets for them.",
                     "parameters": {"type": "object", "properties": {}, "required": []},
                 },
             },
@@ -110,8 +111,11 @@ def architect_agent(architectAgentRequest: ArchitectAgentRequest):
 
             for tool_call in tool_calls:
                 function_name = tool_call.function.name
+                print("Function called is: " + str(function_name))
                 function_to_call = available_functions[function_name]
+                print("Function to call is: " + str(function_to_call))
                 function_args = function_request_mapping[function_name]
+                print("Function args are: " + str(function_args))
 
             return function_to_call(function_args)
         else:
@@ -153,6 +157,7 @@ def create_tickets(createTicketsRequest: CreateTicketsRequest):
             # response_format={ "type": "json_object" }
         )
         subtasks = response.choices[0].message.content
+        print("The subtasks created are: " + str(subtasks))
 
         # Create a list of ticket objects from the subtasks and call create
         tickets = []

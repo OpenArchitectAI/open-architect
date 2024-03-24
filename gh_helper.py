@@ -34,6 +34,10 @@ class GHHelper:
         pr = self.repo.get_pull(pr)
         pr.create_issue_comment(comment)
 
+    def mark_pr_as_approved(self, pr):
+        pr = self.repo.get_pull(pr)
+        pr.create_review(event="APPROVE")        
+        
     def submit_code_review(self, code_review: CodeReview):
         pr = self.repo.get_pull(number=code_review.pr.id)
         pr.create_review(

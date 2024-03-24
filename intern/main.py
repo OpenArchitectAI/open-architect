@@ -1,6 +1,6 @@
 from intern.processors import better_code_change, generate_code_change
-from helpers.gh_helper import GHHelper
-from helpers.trello_helper import TrelloHelper
+from gh_helper import GHHelper
+from trello_helper import TrelloHelper
 import time
 from typing import List
 

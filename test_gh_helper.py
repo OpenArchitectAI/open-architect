@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 import os
 
-from helpers.gh_helper import GHHelper
+from gh_helper import GHHelper
 
 load_dotenv()
 

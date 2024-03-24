@@ -1,6 +1,6 @@
 from github import Auth, Github, InputGitTreeElement, InputGitAuthor
 
-from models import Codebase
+from models import CodeReview, Codebase
 
 
 class GHHelper:
@@ -17,6 +17,15 @@ class GHHelper:
     def list_open_prs(self):
         return self.repo.get_pulls(state="open")
 
+    def get_pr(self, pr_number):
+        print("---get_pr---")
+        try:
+            pr = self.repo.get_pull(pr_number)
+            return pr
+        except Exception as e:
+            print(f"Error fetching PR #{pr_number}: {e}")
+            return None
+
     def get_comments(self, pr):
         pr = self.repo.get_pull(pr)
         return pr.get_issue_comments()
@@ -25,9 +34,13 @@ class GHHelper:
         pr = self.repo.get_pull(pr)
         pr.create_issue_comment(comment)
 
-    def mark_pr_as_approved(self, pr):
-        pr = self.repo.get_pull(pr)
-        pr.create_review(event="APPROVE")
+    def submit_code_review(self, code_review: CodeReview):
+        pr = self.repo.get_pull(number=code_review.pr.id)
+        pr.create_review(
+            event=code_review.event,
+            body=code_review.body,
+            comments=code_review.comments,
+        )
 
     def push_changes(self, branch_name, pr_title, pr_body, new_files):
         # Parse the diff and create blobs for each modified file

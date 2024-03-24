@@ -1,8 +1,10 @@
 from dotenv import load_dotenv
 import os
-from intern import Intern
-from architect import Architect
-from reviewer import Reviewer
+from helpers.trello_helper import TrelloHelper
+from intern.main import Intern
+
+# from architect import Architect
+from reviewer.main import Reviewer
 
 load_dotenv()
 
@@ -21,17 +23,22 @@ with open(".env", "a") as f:
 
 
 # Step 1: With User input (streamit), define tickets, push to Trello's Backlog
-architect = Architect("dave")
-intern1 = Intern("alex")
-intern2 = Intern("bob")
+# architect = Architect("dave")
+# intern1 = Intern("alex")
+# intern2 = Intern("bob")
 while True:
-    # Console interface/Chat with 
-    architect.start_cutting_tickets_for_interns(trello_helper)
+    # Console interface/Chat with
+    # architect.start_cutting_tickets_for_interns(TrelloHelper)
 
     # Show Trello's Backlog: everyone is like "WOW!"
 
     # Step 2: Let's get to work (3 threads) (show dashboard/console to make refresh queries + Trello and GH updates)
-    reviewer = Reviewer("charlie")
-    intern1.run()
-    intern2.run()
+    reviewer = Reviewer(
+        "charlie",
+        gh_api_token=os.environ.get("GITHUB_TOKEN"),
+        gh_repo=os.environ.get("GITHUB_REPO_URL"),
+        trello_helper=TrelloHelper(),
+    )
+    # intern1.run()
+    # intern2.run()
     reviewer.run()

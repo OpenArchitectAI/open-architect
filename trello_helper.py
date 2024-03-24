@@ -55,6 +55,7 @@ class CustomTrelloClient(TrelloClient):
         response = requests.request(http_method, url, headers=headers, params=query_params, data=data)
         return response.json()
 
+
 class TrelloHelper:
     def __init__(self, trello_api_key, trello_token, trello_board_id):
         self.client = CustomTrelloClient(
@@ -92,7 +93,7 @@ class TrelloHelper:
         ticket = self.client.get_card(ticket_id)
         ticket.change_list(self.list_ids[TicketStatus.READY_FOR_REVIEW.value])
 
-    def mov_to_reviewed(self, ticket_id):
+    def move_to_reviewed(self, ticket_id):
         ticket = self.client.get_card(ticket_id)
         ticket.change_list(self.list_ids[TicketStatus.REVIEWED.value])
 
@@ -104,10 +105,16 @@ class TrelloHelper:
         ticket = self.client.get_card(ticket_id)
         ticket.change_list(self.list_ids[TicketStatus.WIP.value])
 
-    def push_tickets_to_backlog_and_assign(self, tickets: List[Ticket], interns: str):
+    def push_tickets_to_backlog_and_assign(self, tickets: List[Ticket]):
+        interns = self.get_intern_list()
         for ticket in tickets:
             assignee = choice(interns)
             print(f"Assigning {ticket.title} to {assignee}")
             # Create a card in the backlog
-            self.client.add_card(ticket.title, ticket.description, self.list_ids[TicketStatus.BACKLOG.value], assignee)
+            card = self.client.add_card(ticket.title, ticket.description, self.list_ids[TicketStatus.BACKLOG.value], assignee)
+
+        return [ticket.title for title in tickets]
         
+    def get_intern_list(self):
+        return [member.username for member in self.client.get_board_members(self.list_ids[TicketStatus.BACKLOG.value])]
+

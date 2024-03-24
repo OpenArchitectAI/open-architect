@@ -7,11 +7,11 @@ ticket_stages = ["backlog", "todo", "wip", "review", "done"]
 
 
 class Ticket(BaseModel):
-    id: int
+    id: Optional[str] = None
     title: str
     description: str
-    status: str
-    assignee_id: int
+    status: Optional[str] = None
+    assignee_id: str
 
 
 class ModifiedFile(BaseModel):

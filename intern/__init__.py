@@ -77,6 +77,8 @@ class Intern:
         )
 
         print("PR Created")
+        
+        self.trello_helper.move_to_waiting_for_review(ticket_id=ticket.id)
 
     def run(self):
         # Two threads are created running in an infinite loop

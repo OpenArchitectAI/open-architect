@@ -92,7 +92,7 @@ class TrelloHelper:
         if not cards:
             return []
         
-        return [Ticket(id=card.id, title=card.name, description=card.description, assignee_id=card.labels[0].id if card.labels else None) for card in cards]
+        return [Ticket(id=card.id, title=card.name, description=card.description, assignee_id=card.labels[0].id if card.labels else "unassigned") for card in cards]
 
     def move_to_waiting_for_review(self, ticket_id):
         ticket = self.client.get_card(ticket_id)

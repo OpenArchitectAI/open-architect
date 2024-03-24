@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# Get the directory of the current script
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+
+# Run the Python script with the provided arguments
+python "${SCRIPT_DIR}/oa_cli.py" "$@"

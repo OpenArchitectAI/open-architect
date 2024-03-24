@@ -9,6 +9,10 @@ from models import Ticket
 from gh_helper import GHHelper
 from trello_helper import TrelloHelper
 
+REFRESH_EVERY = 10
+PROCESS_EVERY = 5
+MAX_REFRESH_CYCLES_WITHOUT_WORK = 50000
+MAX_PROCESS_CYCLES_WITHOUT_WORK = 10000
 
 class Intern:
     def __init__(self, name, gh_helper: GHHelper, trello_helper: TrelloHelper):
@@ -36,6 +40,7 @@ class Intern:
             if t not in self.ticket_backlog and t.assignee_id == self.id
         ]
         self.ticket_backlog.extend(next_tickets)
+        return len(next_tickets) == 0
 
     def refresh_pr_backlog(self):
         next_prs = [
@@ -44,6 +49,7 @@ class Intern:
             if pr not in self.pr_backlog and pr.assignee_id == self.id
         ]
         self.pr_backlog.extend(next_prs)
+        return len(next_prs) == 0
 
     def process_pr(self):
         pr = self.pr_backlog.pop(0)
@@ -54,7 +60,6 @@ class Intern:
         self.gh_helper.push_changes(code_change, pr.ticket_id, pr.assignee_id)
         print(f"[INTERN {self.name}] Moving card to waiting for review")
         self.trello_helper.move_to_waiting_for_review(pr.ticket_id)
-        pass
 
     def process_ticket(self):
         # Get the first ticket from the backlog
@@ -89,31 +94,38 @@ class Intern:
         print(f"[INTERN {self.name}] PR Created")
 
     def refresh_loop(self):
+        cycles_without_work = 0
         while True:
-            cmd = input(f"[INTERN {self.name}] Enter 'p' to fetch new PRs, 't' to fetch new tickets, 'q' to quit: ")
-            if cmd == "p":
-                self.refresh_pr_backlog()
-            elif cmd == "t":
-                self.refresh_ticket_backlog()
-            elif cmd == "q":
-                self.process_thread.join()
-                self.fetch_thread.join()
+            if (not self.refresh_pr_backlog() and not self.refresh_ticket_backlog()):
+                cycles_without_work += 1
+                if cycles_without_work == MAX_REFRESH_CYCLES_WITHOUT_WORK:
+                    print(f"[INTERN {self.name}] No more work to do, bye bye!")
+                    break
+            else:
+                cycles_without_work = 0
+            time.sleep(REFRESH_EVERY)
+        self.process_thread.join()
+        self.fetch_thread.join()
 
     def process_loop(self):
         number_of_attempts = 0
         while True:
             if self.pr_backlog:
                 self.process_pr()
+                number_of_attempts = 0
             elif self.ticket_backlog:
                 self.process_ticket()
+                number_of_attempts = 0
             else:
                 print(f"[INTERN {self.name}] No tickets or PRs to process, idling...")
                 number_of_attempts += 1
                 if number_of_attempts == 5:
                     print(f"[INTERN {self.name}] No more work to do, bye bye!")
-                    self.fetch_thread.join()
-                    self.process_thread.join()
-                time.sleep(30)
+                    break
+                time.sleep(10)
+
+        self.fetch_thread.join()
+        self.process_thread.join()
 
     def run(self):
         # Two threads are created running in an infinite loop

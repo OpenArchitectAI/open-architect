@@ -28,32 +28,32 @@ class Reviewer:
         print(f"next_prs: {next_prs}")
         self.pr_backlog.extend(next_prs)
 
-    def simplify_pr(self, raw_pr: PullRequest, ticket: Ticket) -> PR:
-        files_changed = raw_pr.get_files()
+    # def simplify_pr(self, raw_pr: PullRequest, ticket: Ticket) -> PR:
+    #     files_changed = raw_pr.get_files()
 
-        files_changed_with_diffs: List[ModifiedFile] = []
-        for file in files_changed:
-            files_changed_with_diffs.append(
-                ModifiedFile(
-                    filename=file.filename,
-                    status=file.status,
-                    additions=file.additions,
-                    deletions=file.deletions,
-                    changes=file.changes,
-                    patch=file.patch,  # This contains the diff for the file
-                )
-            )
+    #     files_changed_with_diffs: List[ModifiedFile] = []
+    #     for file in files_changed:
+    #         files_changed_with_diffs.append(
+    #             ModifiedFile(
+    #                 filename=file.filename,
+    #                 status=file.status,
+    #                 additions=file.additions,
+    #                 deletions=file.deletions,
+    #                 changes=file.changes,
+    #                 patch=file.patch,  # This contains the diff for the file
+    #             )
+    #         )
 
-        pr: PR = PR(
-            id=raw_pr.number,
-            ticket_id=ticket.id,
-            assignee_id=ticket.assignee_id,
-            title=raw_pr.title,
-            description=raw_pr.body if raw_pr.body is not None else "",
-            files_changed=files_changed_with_diffs,
-        )
+    #     pr: PR = PR(
+    #         id=raw_pr.number,
+    #         ticket_id=ticket.id,
+    #         assignee_id=ticket.assignee_id,
+    #         title=raw_pr.title,
+    #         description=raw_pr.body if raw_pr.body is not None else "",
+    #         files_changed=files_changed_with_diffs,
+    #     )
 
-        return pr
+    #     return pr
 
     def submit_code_review(self, generated_code_review: GeneratedCodeReview):
         print(generated_code_review.code_review)

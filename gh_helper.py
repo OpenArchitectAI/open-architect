@@ -37,21 +37,23 @@ class GHHelper:
     def list_open_prs(self) -> List[PR]:
         open_prs = []
         for pr in self.repo.get_pulls(state="open"):
-            files_changed = pr.get_files()
-            files_changed_with_diffs = []
-            for file in files_changed:
-                files_changed_with_diffs.append(
-                    ModifiedFile(
-                        filename=file.filename,
-                        status=file.status,
-                        additions=file.additions,
-                        deletions=file.deletions,
-                        changes=file.changes,
-                        patch=file.patch,  # This contains the diff for the file
+            # Check if PR is not approved or not changes requested
+            if not any(review.state in ["APPROVED", "CHANGES_REQUESTED"] for review in pr.get_reviews()):
+                files_changed = pr.get_files()
+                files_changed_with_diffs = []
+                for file in files_changed:
+                    files_changed_with_diffs.append(
+                        ModifiedFile(
+                            filename=file.filename,
+                            status=file.status,
+                            additions=file.additions,
+                            deletions=file.deletions,
+                            changes=file.changes,
+                            patch=file.patch,  # This contains the diff for the file
+                        )
                     )
-                )
-            ticket_id, assignee_id = extract_ticket_info_from_pr_body(pr.body)
-            open_prs.append(PR(id=pr.number, title=pr.title, description=pr.body, assignee_id=assignee_id, ticket_id=ticket_id, files_changed=files_changed_with_diffs, raw_pr=pr))
+                ticket_id, assignee_id = extract_ticket_info_from_pr_body(pr.body)
+                open_prs.append(PR(id=pr.number, title=pr.title, description=pr.body, assignee_id=assignee_id, ticket_id=ticket_id, files_changed=files_changed_with_diffs, raw_pr=pr))
         return open_prs
     def get_pr(self, pr_number):
         print("---get_pr---")

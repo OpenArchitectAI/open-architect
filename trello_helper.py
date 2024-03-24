@@ -68,6 +68,11 @@ class TrelloHelper:
         print(f"Selected board: {board.name}")
         print(f"Board lists: {board.list_lists()}")
         self.list_ids = {list.name: list.id for list in board.list_lists()}
+        expected_values = [v.value for v in TicketStatus]
+        for val in expected_values:
+            if val not in self.list_ids:
+                print(f"Error: List {val} not found. Make sure you have the correct list names {expected_values}.")
+                exit(1)
 
     def get_backlog_tickets(self):
         cards = self.client.get_list(self.list_ids[TicketStatus.BACKLOG.value])

@@ -34,4 +34,10 @@ def generate_code_change(ticket: Ticket, code_base: Codebase):
     with open("diff.txt", "w") as f:
         f.write(diff)
 
-    return "code_change"
+    # Quick pre-processing, remove the initial ```diff line and the last ``` line if and only if they are present
+    if diff.startswith("```diff\n"):
+        diff = diff[len("```diff\n") :]
+    if diff.endswith("```"):
+        diff = diff[: -len("```")]
+
+    return diff

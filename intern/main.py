@@ -54,6 +54,12 @@ class Intern:
         # Call an agent to create a PR
         code_change = generate_code_change(ticket, self.gh_helper.get_entire_codebase())
 
+        print("Pushing changes to a PR")
+        # Push the changes to the PR
+        self.gh_helper.push_changes(ticket.title, code_change)
+
+        print("PR Created")
+
     def run(self):
         # Two threads are created running in an infinite loop
         # The first one listens to refresh commands and refreshes the backlogs

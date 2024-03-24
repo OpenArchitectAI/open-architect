@@ -19,18 +19,11 @@ class DiffGenerator(dspy.Module):
 
     def forward(self, codebase: Codebase, ticket: Ticket):
         # Get the diff
-
-        # Dump values in txt
-        with open("codebase.txt", "w") as f:
-            f.write(json.dumps(codebase.model_dump()))
-        with open("ticket.txt", "w") as f:
-            f.write(json.dumps(ticket.model_dump()))
-
-            exit()
-
+        print("Generating diff")
         diff = self.diff_generator(
             codebase=json.dumps(codebase.model_dump()),
             ticket=json.dumps(ticket.model_dump()),
         )
+        print("Diff generated")
 
         return diff.git_diff

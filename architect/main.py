@@ -1,6 +1,7 @@
 """
     This file will handle setting up an agent that will essentially handle having a conversation with the user and then based on that conversation, break the task up into tickets and then actually create thoe tickets. It will be implemented both through prompts and through DsPy later on.
 """
+
 from trello import TrelloClient
 import concurrent.futures
 from pydantic import BaseModel
@@ -13,29 +14,34 @@ import os
 OPENAI_API_KEY = ""
 os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
 
+
 class Ticket(BaseModel):
     title: str
     description: str
 
+
 class ArchitectAgentRequest(BaseModel):
-    question: str 
-    history: Any 
+    question: str
+    history: Any
+
 
 class CreateTicketsRequest(BaseModel):
     tickets: List[Ticket]
 
+
 class CreateSubtasksRequest(BaseModel):
-    question: str 
+    question: str
     history: Any
 
 
-# Define the function calling agent 
+# Define the function calling agent
 def architect_agent(architectAgentRequest: ArchitectAgentRequest):
     """
-        Routing logic for all tools supported by the feedback agent.
+    Routing logic for all tools supported by the feedback agent.
     """
 
     client = OpenAI()
+
     def run_conversation():
 
         messages = [
@@ -50,31 +56,22 @@ def architect_agent(architectAgentRequest: ArchitectAgentRequest):
              
             Once you know all of the details of the project in order to execute exactly what the user wants, you can then break down the task into smaller tickets and then create those tickets. You have been given the following task: {architectAgentRequest.question}."""},
             {"role": "user", "content": architectAgentRequest.question}]
-        
         tools = [
             {
                 "type": "function",
                 "function": {
                     "name": "create_subtasks",
                     "description": "Based on the user's initial descriptions of the task, break the task down into detailed subtasks to accomplish the larger task. Each subtask should include a title and a detailed description of the subtask.",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {},
-                        "required": []
-                    }
-                }
+                    "parameters": {"type": "object", "properties": {}, "required": []},
+                },
             },
             {
                 "type": "function",
                 "function": {
                     "name": "create_tickets",
                     "description": "Create tickets based on the subtasks that are generated for the task.  This will actually take the subtasks generated and create the trello tickets for them.",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {},
-                        "required": []
-                    }
-                }
+                    "parameters": {"type": "object", "properties": {}, "required": []},
+                },
             },
         ]
 
@@ -95,8 +92,8 @@ def architect_agent(architectAgentRequest: ArchitectAgentRequest):
                 tickets = [Ticket(title="Title", description="Description") for i in range(3)]
             ),
             "create_subtasks": CreateSubtasksRequest(
-                question= architectAgentRequest.question,
-                history= architectAgentRequest.history,
+                question=architectAgentRequest.question,
+                history=architectAgentRequest.history,
             ),
         }
 
@@ -120,25 +117,26 @@ def architect_agent(architectAgentRequest: ArchitectAgentRequest):
     return run_conversation()
 
 
-
-# Ticket creation tool 
+# Ticket creation tool
 client = TrelloClient(
-    api_key='YOUR_KEY',
-    api_secret='YOUR_SECRET',
-    token='YOUR_TOKEN',
-    token_secret='YOUR_TOKEN_SECRET'
+    api_key="YOUR_KEY",
+    api_secret="YOUR_SECRET",
+    token="YOUR_TOKEN",
+    token_secret="YOUR_TOKEN_SECRET",
 )
+
 
 def create_ticket(board_id, list_id, name, desc):
     """
-    This function will be responsible for creating the tickets based on the user input and then pushing them to the Trello board. 
+    This function will be responsible for creating the tickets based on the user input and then pushing them to the Trello board.
     """
     board = client.get_board(board_id)
     trello_list = board.get_list(list_id)
     trello_list.add_card(name, desc)
-    
-    # Return a response saying that it has created tickets with the corresponding titles and descriptions 
+
+    # Return a response saying that it has created tickets with the corresponding titles and descriptions
     return f"Created ticket with title: {name} and description: {desc}"
+
 
 def create_tickets(tickets):
     """
@@ -146,13 +144,19 @@ def create_tickets(tickets):
     """
     with concurrent.futures.ThreadPoolExecutor() as executor:
         for ticket in tickets:
-            executor.submit(create_ticket, 'BOARD_ID', 'LIST_ID', ticket['title'], ticket['description'])
+            executor.submit(
+                create_ticket,
+                "BOARD_ID",
+                "LIST_ID",
+                ticket["title"],
+                ticket["description"],
+            )
 
 
 # Define the tool for breaking up the overall project description into multiple smaller tasks and then getting user feedback on them
 def create_subtasks(project_description):
     """
-    This function will be responsible for breaking up the overall project description into multiple smaller tasks and then getting user feedback on them. 
+    This function will be responsible for breaking up the overall project description into multiple smaller tasks and then getting user feedback on them.
     """
     try:
         client = OpenAI(api_key=OPENAI_API_KEY)
@@ -171,9 +175,12 @@ def create_subtasks(project_description):
         response = client.chat.completions.create(
             model="gpt-3.5-turbo-1106",
             messages=[
-                {"role": "system", "content": "You are a senior staff engineer, who is responsible for breaking up large complex tasks into small, granular subtasks that more junior engineers can easily work through and execute on."},
+                {
+                    "role": "system",
+                    "content": "You are a senior staff engineer, who is responsible for breaking up large complex tasks into small, granular subtasks that more junior engineers can easily work through and execute on.",
+                },
                 {"role": "user", "content": questionPrompt},
-            ]
+            ],
         )
         subtasks = response.choices[0].message.content
 
@@ -182,4 +189,3 @@ def create_subtasks(project_description):
     except Exception as e:
         print("Failed to generate subtasks with error " + str(e))
         return "Failed to generate subtasks with error " + str(e)
-

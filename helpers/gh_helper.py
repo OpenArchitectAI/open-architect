@@ -1,7 +1,4 @@
-from github import Github
-
-# Authentication is defined via github.Auth
-from github import Auth
+from github import Auth, Github
 
 class GHHelper:
     def __init__(self, gh_api_token):
@@ -22,3 +19,9 @@ class GHHelper:
 
     def push_changes(self, repo):
         print(f"Pushing changes to {repo}")
+
+    def get_entire_codebase(self):
+        print("Getting entire codebase")
+
+    def get_file_contents(self, file):
+        print(f"Getting contents of file {file}")

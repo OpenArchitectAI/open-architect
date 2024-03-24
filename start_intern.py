@@ -12,7 +12,7 @@ openai.api_key = json.loads(open("creds.json").read())["openai"]
 load_dotenv()
 
 gh_repo = os.getenv("GITHUB_REPO_URL")
-gh_api_token = os.getenv("GITHUB_TOKEN")
+gh_api_token = os.getenv("GITHUB_TOKEN_INTERN")
 trello_api_key = os.getenv("TRELLO_API_KEY")
 trello_api_secret = os.getenv("TRELLO_API_SECRET")
 trello_token = os.getenv("TRELLO_TOKEN")

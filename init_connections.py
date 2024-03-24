@@ -6,8 +6,8 @@ from trello import create_oauth_token
 load_dotenv()
 
 gh_repo = os.getenv("GITHUB_REPO_URL")
-gh_api_token_intern = os.getenv("GITHUB_INTERN_TOKEN")
-gh_api_token_reviewer = os.getenv("GITHUB_REVIEWER_TOKEN")
+gh_api_token_intern = os.getenv("GITHUB_TOKEN_INTERN")
+gh_api_token_reviewer = os.getenv("GITHUB_TOKEN_REVIEWER")
 trello_api_key = os.getenv("TRELLO_API_KEY")
 trello_api_secret = os.getenv("TRELLO_API_SECRET")
 trello_token = os.getenv("TRELLO_TOKEN")
@@ -40,3 +40,5 @@ with open(".env", "w") as f:
     f.write(f"TRELLO_API_SECRET={trello_api_secret}\n")
     f.write(f"TRELLO_TOKEN={trello_token}\n")
     f.write(f"TRELLO_BOARD_ID={trello_board_id}\n")
+
+print("Environment variables set up successfully")

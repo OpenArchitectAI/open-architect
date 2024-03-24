@@ -1,5 +1,7 @@
 from github import Auth, Github
 
+from models import Codebase
+
 
 class GHHelper:
     def __init__(self, gh_api_token, gh_repo):
@@ -31,7 +33,7 @@ class GHHelper:
         self.repo.create_git_ref(ref=f"refs/heads/{branch_name}", sha=self.repo.get_branch("main").commit.sha)
         self.repo.create_pull(title=branch_name, body=comment, head=branch_name, base="main")
 
-    def get_entire_codebase(self):
+    def get_entire_codebase(self) -> Codebase:
         contents = self.repo.get_contents("")
         if not isinstance(contents, list):
             contents = [contents]

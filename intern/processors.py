@@ -8,9 +8,12 @@ def better_code_change(previous_code_change, pr, comments):
     # The function will return a new code_change that will be pushed to the PR
     return "new_code_change"
 
-def code_change(ticket_scope, code_base):
+
+def generate_code_change(ticket_scope, code_base):
     # This function will be called from Intern.process_ticket
     # It will take the ticket_scope and the code_base
     # and will return a new code_change
+    print(ticket_scope)
+    print(code_base)
 
-    return "code_change" 
+    return "code_change"

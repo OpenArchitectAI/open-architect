@@ -7,6 +7,7 @@ class TrelloHelper:
 
     def get_backlog_tickets(self):
         print("Getting backlog tickets")
+        return []
 
     def get_waiting_for_review_tickets(self):
         print("Getting waiting for review tickets")

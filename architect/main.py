@@ -8,8 +8,10 @@ from typing import Any, Union, List
 from openai import OpenAI
 import time
 import json
+import os 
 
-OPENAI_API_KEY = ""
+OPENAI_API_KEY = "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"
+os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
 
 class Ticket(BaseModel):
     title: str
@@ -37,9 +39,16 @@ def architect_agent(architectAgentRequest: ArchitectAgentRequest):
     def run_conversation():
 
         messages = [
-            {"role": "system", "content": f"""You are a principal software engineer who is responsible for mentoring engineers and breaking down tasks into smaller tickets. You want to first ask the user several probing questions to better understand the feature that they are trying to build.  
+            {"role": "system", "content": f"""
+             You are a principal software engineer who is responsible for mentoring engineers and breaking down tasks into smaller tickets. You want to first ask the user several probing questions to better understand the feature that they are trying to build.  
              
-            Ask them questions to better explain different aspects of the feature that they are asking for.  You have been asked to break down a task into smaller tickets and then create those tickets. You have been given the following task: {architectAgentRequest.question}."""},
+            Ask them questions to better explain different aspects of the feature that they are asking for. 
+             
+            First ask them in detail what they want to build.  You MUST first clarify the project requirements and ask them to provide a detailed description of the project. DO NOT create tickets until you have a clear understanding of the project requirements.
+             
+            Ask them 3-4 clarifying questions for more details about any necessary backend, front end and hosting components of the project.
+             
+            Once you know all of the details of the project in order to execute exactly what the user wants, you can then break down the task into smaller tickets and then create those tickets. You have been given the following task: {architectAgentRequest.question}."""},
             {"role": "user", "content": architectAgentRequest.question}]
         
         tools = [
@@ -78,14 +87,12 @@ def architect_agent(architectAgentRequest: ArchitectAgentRequest):
             tool_choice="auto",
         )
         afterFunctionCall = time.time()
-        print("Time to function call: " + str(afterFunctionCall - beforeFunctionCall))
 
         response_message = response.choices[0].message
         tool_calls = response_message.tool_calls
         function_request_mapping = {
             "create_tickets": CreateTicketsRequest(
-                question= architectAgentRequest.question,
-                history= architectAgentRequest.history,
+                tickets = [Ticket(title="Title", description="Description") for i in range(3)]
             ),
             "create_subtasks": CreateSubtasksRequest(
                 question= architectAgentRequest.question,
@@ -102,13 +109,13 @@ def architect_agent(architectAgentRequest: ArchitectAgentRequest):
 
             for tool_call in tool_calls:
                 function_name = tool_call.function.name
-                print("FUNCTION NAME: " + str(function_name))
                 function_to_call = available_functions[function_name]
-                print("FUNCTION TO CALL: " + str(function_to_call))
                 function_args = function_request_mapping[function_name]
-                print("FUNCTION ARGS: " + str(function_args))
 
             return function_to_call(function_args)
+        else:
+            print("returning message: " + str(response_message.content))
+            return response_message.content
 
     return run_conversation()
 

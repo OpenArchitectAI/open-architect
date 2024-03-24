@@ -2,7 +2,7 @@ from typing import List
 
 from github import Auth, Github, InputGitTreeElement, InputGitAuthor
 
-from models import CodeReview, Codebase, Ticket, PR
+from models import CodeReview, Codebase, ModifiedFile, Ticket, PR
 
 TICKET_DELIMITER = "Ticket: "
 AUTHOR_DELIMITER = "Author: "
@@ -35,8 +35,24 @@ class GHHelper:
             print(f"Error: {e}")
 
     def list_open_prs(self) -> List[PR]:
-        return [PR(id=pr.number, title=pr.title, description=pr.body, assignee_id=extract_ticket_info_from_pr_body(pr.body)[1], ticket_id=extract_ticket_info_from_pr_body(pr.body)[0]) for pr in self.repo.get_pulls(state="open")]
-
+        open_prs = []
+        for pr in self.repo.get_pulls(state="open"):
+            files_changed = pr.get_files()
+            files_changed_with_diffs = []
+            for file in files_changed:
+                files_changed_with_diffs.append(
+                    ModifiedFile(
+                        filename=file.filename,
+                        status=file.status,
+                        additions=file.additions,
+                        deletions=file.deletions,
+                        changes=file.changes,
+                        patch=file.patch,  # This contains the diff for the file
+                    )
+                )
+            ticket_id, assignee_id = extract_ticket_info_from_pr_body(pr.body)
+            open_prs.append(PR(id=pr.number, title=pr.title, description=pr.body, assignee_id=assignee_id, ticket_id=ticket_id, files_changed=files_changed_with_diffs, raw_pr=pr))
+        return open_prs
     def get_pr(self, pr_number):
         print("---get_pr---")
         try:

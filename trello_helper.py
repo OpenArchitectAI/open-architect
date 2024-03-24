@@ -74,21 +74,25 @@ class TrelloHelper:
             if val not in self.list_ids:
                 print(f"Error: List {val} not found. Make sure you have the correct list names {expected_values}.")
                 exit(1)
+                
+    def get_ticket(self, ticket_id):
+        card = self.client.get_card(ticket_id)
+        return Ticket(id=card.id, title=card.name, description=card.description, assignee_id=card.labels[0].id if card.labels else None)
 
     def get_backlog_tickets(self):
         cards = self.client.get_list(self.list_ids[TicketStatus.BACKLOG.value]).list_cards()
         if not cards:
             return []
         
-        return [Ticket(id=card.id, title=card.name, description=card.description, assignee_id=card.labels[0].id) for card in cards]
+        return [Ticket(id=card.id, title=card.name, description=card.description, assignee_id=card.labels[0].id if card.labels else "unassigned") for card in cards]
 
     def get_waiting_for_review_tickets(self):
         cards = self.client.get_list(self.list_ids[TicketStatus.READY_FOR_REVIEW.value]).list_cards()
         if not cards:
             return []
         
-        return [Ticket(id=card.id, title=card.name, description=card.description, assignee_id=card.labels[0].id) for card in cards]
-    
+        return [Ticket(id=card.id, title=card.name, description=card.description, assignee_id=card.labels[0].id if card.labels else "unassigned") for card in cards]
+
     def get_labels(self):
         return [label.id for label in self.client.get_board(self.client.list_boards()[0].id).get_labels()]
 

@@ -17,3 +17,6 @@ venv.bak/
 
 # Private keys
 *.pem
+*.log
+*.pyc
+creds.json

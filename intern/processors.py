@@ -1,5 +1,5 @@
 from intern.agents.diff_generator import DiffGenerator
-from language_models import gpt4
+from language_models import gpt4, mistral
 import dspy
 
 from models import Codebase, Ticket
@@ -23,7 +23,7 @@ def generate_code_change(ticket: Ticket, code_base: Codebase):
     print(ticket)
     print(code_base.files.keys())
 
-    dspy.configure(lm=gpt4)
+    dspy.configure(lm=mistral)
 
     diff_generator = DiffGenerator()
 

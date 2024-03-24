@@ -20,7 +20,7 @@ intern1 = Intern("alex", gh_api_token, gh_repo, gh_repo)
 
 intern1.ticket_backlog = [
     Ticket(
-        id="6",
+        id=8,
         title="Add a route to stop the API",
         description="This route should stop the API or even kill the process",
         assignee_id="0",

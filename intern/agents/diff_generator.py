@@ -25,7 +25,7 @@ class NewFilesGeneratorSignature(dspy.Signature):
     relevant_codebase = dspy.InputField()
     ticket = dspy.InputField()
     new_files: Dict[str, str] = dspy.OutputField(
-        desc="Give the files that need to be update or created complete the ticket. The key is the path of the file and the value is the content of the file."
+        desc="Generate the entire files that need to be update or created complete the ticket, with all of their content post update. The key is the path of the file and the value is the content of the file."
     )
     explanations = dspy.OutputField(
         desc="Give explanations for the new files generated."
@@ -37,10 +37,10 @@ class DiffGenerator(dspy.Module):
         super().__init__()
 
         self.diff_generator = dspy.ChainOfThought(DiffGeneratorSignature)
-        self.relevant_file_selector = dspy.TypedPredictor(
+        self.relevant_file_selector = dspy.TypedChainOfThought(
             RelevantFileSelectionSignature
         )
-        self.new_files_generator = dspy.TypedPredictor(NewFilesGeneratorSignature)
+        self.new_files_generator = dspy.TypedChainOfThought(NewFilesGeneratorSignature)
 
     def forward(self, codebase: Codebase, ticket: Ticket):
         print("First step: Selecting relevant files")

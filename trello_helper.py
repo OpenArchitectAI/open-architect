@@ -93,9 +93,6 @@ class TrelloHelper:
         
         return [Ticket(id=card.id, title=card.name, description=card.description, assignee_id=card.labels[0].id if card.labels else "unassigned") for card in cards]
 
-    def get_labels(self):
-        return [label.id for label in self.client.get_board(self.client.list_boards()[0].id).get_labels()]
-
     def move_to_waiting_for_review(self, ticket_id):
         ticket = self.client.get_card(ticket_id)
         ticket.change_list(self.list_ids[TicketStatus.READY_FOR_REVIEW.value])
@@ -117,11 +114,13 @@ class TrelloHelper:
         for ticket in tickets:
             assignee = choice(interns)
             print(f"Assigning {ticket.title} to {assignee}")
+            ticket.assignee_id = assignee
+            ticket.status = TicketStatus.BACKLOG
             # Create a card in the backlog
-            card = self.client.add_card(ticket.title, ticket.description, self.list_ids[TicketStatus.BACKLOG.value], assignee)
+            self.client.add_card(ticket.title, ticket.description, self.list_ids[TicketStatus.BACKLOG.value], assignee)
 
-        return [ticket.title for title in tickets]
+        return [t.title for t in tickets]
         
     def get_intern_list(self):
-        return [member.username for member in self.client.get_board_members(self.list_ids[TicketStatus.BACKLOG.value])]
+        return [label.id for label in self.client.list_boards()[0].get_labels()]
 

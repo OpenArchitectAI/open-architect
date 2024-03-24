@@ -2,8 +2,8 @@ from typing import List
 from reviewer.agents.code_review_generator import GeneratedCodeReview
 from reviewer.processors import review_code
 
-from helpers.gh_helper import GHHelper
-from helpers.trello_helper import TrelloHelper
+from gh_helper import GHHelper
+from trello_helper import TrelloHelper
 from models import PR, CodeReview, ModifiedFile, Ticket
 
 import time
@@ -14,7 +14,7 @@ class Reviewer:
         self.name = name
         self.pr_backlog = []
         self.gh_helper: GHHelper = GHHelper(gh_api_token, gh_repo)
-        self.trello_helper: TrelloHelper = TrelloHelper()
+        self.trello_helper: TrelloHelper = trello_helper
 
     def refresh_pr_backlog(self):
         print("---refresh_pr_backlog---")
@@ -70,10 +70,10 @@ class Reviewer:
         # Todo: Fetch the Trello ticket that corresponds to this PR
         # ticket = self.trello_helper.get_ticket(id=pr.ticket_id)
         placeholder_ticket = Ticket(
-            id=1,
+            id="1",
             title="Improve with intructions to start",
             description="Our README should be more detailed on how to start the project.",
-            assignee_id=0,
+            assignee_id="0",
             status="backlog",
         )
 

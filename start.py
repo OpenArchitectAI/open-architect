@@ -3,9 +3,10 @@ import os
 
 from gh_helper import GHHelper
 from trello_helper import TrelloHelper
-from intern import Intern
-from architect import Architect
-from reviewer import Reviewer
+from intern.main import Intern
+
+# from architect import Architect
+from reviewer.main import Reviewer
 
 load_dotenv()
 
@@ -16,8 +17,17 @@ trello_api_secret = os.getenv("TRELLO_API_SECRET")
 trello_token = os.getenv("TRELLO_TOKEN")
 trello_board_id = os.getenv("TRELLO_BOARD_ID")
 
-if gh_repo is None or gh_api_token is None or trello_api_key is None or trello_api_secret is None or trello_token is None or trello_board_id is None:
-    print("Please run the init_connections.py script to set up the environment variables")
+if (
+    gh_repo is None
+    or gh_api_token is None
+    or trello_api_key is None
+    or trello_api_secret is None
+    or trello_token is None
+    or trello_board_id is None
+):
+    print(
+        "Please run the init_connections.py script to set up the environment variables"
+    )
 
 
 # Write them back to the .env file
@@ -33,15 +43,13 @@ with open(".env", "w") as f:
 gh_helper = GHHelper(gh_api_token, gh_repo)
 trello_helper = TrelloHelper(trello_api_key, trello_token, trello_board_id)
 
-print(trello_helper.get_backlog_tickets())
-
 # Step 1: With User input (streamit), define tickets, push to Trello's Backlog
-architect = Architect("dave")
-intern1 = Intern("alex")
-intern2 = Intern("bob")
+# architect = Architect("dave")
+# intern1 = Intern("alex")
+# intern2 = Intern("bob")
 while True:
     # Console interface/Chat with
-    architect.start_cutting_tickets_for_interns(TrelloHelper)
+    # architect.start_cutting_tickets_for_interns(TrelloHelper)
 
     # Show Trello's Backlog: everyone is like "WOW!"
 
@@ -50,8 +58,8 @@ while True:
         "charlie",
         gh_api_token=os.environ.get("GITHUB_TOKEN"),
         gh_repo=os.environ.get("GITHUB_REPO_URL"),
-        trello_helper=TrelloHelper(),
+        trello_helper=trello_helper,
     )
-    intern1.run()
-    intern2.run()
+    # intern1.run()
+    # intern2.run()
     reviewer.run()

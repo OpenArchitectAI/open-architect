@@ -1,13 +1,17 @@
 from intern.processors import better_code_change, generate_code_change
+from random import choice
 import time
 from typing import List
-
 from models import Ticket
+
+from gh_helper import GHHelper
+from trello_helper import TrelloHelper
 
 
 class Intern:
-    def __init__(self, name, gh_helper, trello_helper):
+    def __init__(self, name, gh_helper: GHHelper, trello_helper: TrelloHelper):
         self.name = name
+        self.id = choice(trello_helper.get_labels())
         self.ticket_backlog: List[Ticket] = []
         self.pr_backlog = []
         self.gh_helper = gh_helper
@@ -18,7 +22,7 @@ class Intern:
         next_tickets = [
             t
             for t in self.trello_helper.get_backlog_tickets()
-            if t not in self.ticket_backlog and t.assignee_id == self.name
+            if t not in self.ticket_backlog and t.assignee_id == self.id
         ]
         self.ticket_backlog.extend(next_tickets)
 
@@ -26,7 +30,7 @@ class Intern:
         next_prs = [
             pr
             for pr in self.gh_helper.list_open_prs()
-            if pr not in self.pr_backlog and pr.assignee_id == self.name
+            if pr not in self.pr_backlog and pr.assignee_id == self.id
         ]
         self.pr_backlog.extend(next_prs)
 

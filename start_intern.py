@@ -20,9 +20,9 @@ intern1 = Intern("alex", gh_api_token, gh_repo, gh_repo)
 
 intern1.ticket_backlog = [
     Ticket(
-        id=1,
-        title="Improve with intructions to start",
-        description="Our README should be more detailed on how to start the project.",
+        id=3,
+        title="Add a route to stop the API",
+        description="This route should stop the API or even kill the process",
         assignee_id=0,
         status="backlog",
     )

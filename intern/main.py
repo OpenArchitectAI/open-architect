@@ -52,11 +52,19 @@ class Intern:
 
         # There should not be some PRs already assigned to this ticket (for now)
         # Call an agent to create a PR
-        code_change = generate_code_change(ticket, self.gh_helper.get_entire_codebase())
+        code_change, body = generate_code_change(
+            ticket, self.gh_helper.get_entire_codebase()
+        )
 
         print("Pushing changes to a PR")
         # Push the changes to the PR
-        self.gh_helper.push_changes(ticket.title, code_change)
+        branch_name = f"{ticket.id}_{ticket.title.lower().replace(' ', '_')}"
+        self.gh_helper.push_changes(
+            branch_name=branch_name,
+            pr_title=ticket.title,
+            pr_body=body,
+            diff=code_change,
+        )
 
         print("PR Created")
 

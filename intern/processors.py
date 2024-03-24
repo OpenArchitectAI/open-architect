@@ -28,7 +28,7 @@ def generate_code_change(ticket: Ticket, code_base: Codebase):
 
     diff_generator = DiffGenerator()
 
-    diff = diff_generator(code_base, ticket)
+    diff, explanations = diff_generator(code_base, ticket)
 
     # For now write it in a file
     with open("diff.txt", "w") as f:
@@ -40,4 +40,4 @@ def generate_code_change(ticket: Ticket, code_base: Codebase):
     if diff.endswith("```"):
         diff = diff[: -len("```")]
 
-    return diff
+    return diff, explanations

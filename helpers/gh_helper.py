@@ -29,7 +29,7 @@ class GHHelper:
         pr = self.repo.get_pull(pr)
         pr.create_review(event="APPROVE")
 
-    def push_changes(self, branch_name, diff):
+    def push_changes(self, branch_name, pr_title, pr_body, diff):
         # Parse the diff and create blobs for each modified file
         # Hoping that the diff is properly formatted
 
@@ -53,7 +53,6 @@ class GHHelper:
         new_tree = self.repo.create_git_tree(modified_files, base_tree)
 
         # Create a new branch
-        branch_name = "new-feature-9"
         ref = self.repo.create_git_ref(
             f"refs/heads/{branch_name}", self.repo.get_commits()[0].sha
         )
@@ -73,8 +72,6 @@ class GHHelper:
         ref.edit(sha=new_commit.sha)
 
         # Create a new pull request
-        pr_title = "New Feature Pull Request"
-        pr_body = "Please review and merge the changes."
         base_branch = "main"  # Replace with the target branch for the pull request
         head = f"{self.repo.owner.login}:{branch_name}"  # Update the head parameter
         pr = self.repo.create_pull(

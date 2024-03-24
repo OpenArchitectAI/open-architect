@@ -1,7 +1,6 @@
 from intern.agents.diff_generator import DiffGenerator
 from language_models import gpt4
 import dspy
-import json
 
 from models import Codebase, Ticket
 
@@ -28,16 +27,6 @@ def generate_code_change(ticket: Ticket, code_base: Codebase):
 
     diff_generator = DiffGenerator()
 
-    diff = diff_generator(code_base, ticket)
+    new_files, explanations = diff_generator(code_base, ticket)
 
-    # For now write it in a file
-    with open("diff.txt", "w") as f:
-        f.write(diff)
-
-    # Quick pre-processing, remove the initial ```diff line and the last ``` line if and only if they are present
-    if diff.startswith("```diff\n"):
-        diff = diff[len("```diff\n") :]
-    if diff.endswith("```"):
-        diff = diff[: -len("```")]
-
-    return diff
+    return new_files, explanations

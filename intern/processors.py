@@ -1,7 +1,6 @@
 from intern.agents.diff_generator import DiffGenerator
 from language_models import gpt4
 import dspy
-import json
 
 from models import Codebase, Ticket
 
@@ -29,9 +28,5 @@ def generate_code_change(ticket: Ticket, code_base: Codebase):
     diff_generator = DiffGenerator()
 
     new_files, explanations = diff_generator(code_base, ticket)
-
-    # For now write it in a file
-    with open("diff.json", "w") as f:
-        f.write(json.dumps(new_files))
 
     return new_files, explanations

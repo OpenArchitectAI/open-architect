@@ -3,7 +3,6 @@ import dspy
 import json
 
 from models import Codebase, Ticket
-from intern.utils import generate_diffs
 
 
 class RelevantFileSelectionSignature(dspy.Signature):
@@ -58,16 +57,11 @@ class DiffGenerator(dspy.Module):
 
         relevant_codebase = Codebase(files=subset_codebase)
 
-        print("Generating diff")
+        print("Generating new files")
         new_files = self.new_files_generator(
             relevant_codebase=json.dumps(relevant_codebase.model_dump()),
             ticket=json.dumps(ticket.model_dump()),
         )
-
-        # diff = generate_diffs(relevant_codebase.files, new_files.new_files)
-
-        # Now generate the diff with the new files with a standard diff generator
-
-        print("Diff generated")
+        print("New files generated")
 
         return new_files.new_files, new_files.explanations

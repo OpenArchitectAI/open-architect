@@ -28,8 +28,12 @@ class GHHelper:
         pr.create_review(event="APPROVE")
 
     def push_changes(self, branch_name, comment):
-        self.repo.create_git_ref(ref=f"refs/heads/{branch_name}", sha=self.repo.get_branch("main").commit.sha)
-        self.repo.create_pull(title=branch_name, body=comment, head=branch_name, base="main")
+        self.repo.create_git_ref(
+            ref=f"refs/heads/{branch_name}", sha=self.repo.get_branch("main").commit.sha
+        )
+        self.repo.create_pull(
+            title=branch_name, body=comment, head=branch_name, base="main"
+        )
 
     def get_entire_codebase(self):
         contents = self.repo.get_contents("")

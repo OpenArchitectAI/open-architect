@@ -5,7 +5,7 @@ from gh_helper import GHHelper
 from trello_helper import TrelloHelper
 from intern import Intern
 
-# from architect import Architect
+import chat_interface
 from reviewer import Reviewer
 
 load_dotenv()
@@ -58,6 +58,9 @@ reviewer = Reviewer(
         gh_helper=gh_helper_reviewer,
         trello_helper=trello_helper,
     )
+
+chat_interface.open_architect(trello_helper, gh_helper)
+
 while True:
     # Console interface/Chat with
     # architect.start_cutting_tickets_for_interns(TrelloHelper)

@@ -15,3 +15,20 @@ if gh_api_token is None:
 with open(".env", "a") as f:
     f.write(f"GITHUB_REPO_URL={gh_repo}\n")
     f.write(f"GITHUB_TOKEN={gh_api_token}\n")
+
+
+# Step 1: With User input (streamit), define tickets, push to Trello's Backlog
+architect = Architect("dave")
+intern1 = Intern("alex")
+intern2 = Intern("bob")
+while True:
+    # Console interface/Chat with 
+    architect.start_cutting_tickets_for_interns(trello_helper)
+
+    # Show Trello's Backlog: everyone is like "WOW!"
+
+    # Step 2: Let's get to work (3 threads) (show dashboard/console to make refresh queries + Trello and GH updates)
+    reviewer = Reviewer("charlie")
+    intern1.run()
+    intern2.run()
+    reviewer.run()

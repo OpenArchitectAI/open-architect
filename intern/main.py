@@ -1,6 +1,4 @@
 from intern.processors import better_code_change, generate_code_change
-from gh_helper import GHHelper
-from trello_helper import TrelloHelper
 import time
 from typing import List
 
@@ -8,18 +6,18 @@ from models import Ticket
 
 
 class Intern:
-    def __init__(self, name, gh_api_token, gh_repo, trello_helper):
+    def __init__(self, name, gh_helper, trello_helper):
         self.name = name
         self.ticket_backlog: List[Ticket] = []
         self.pr_backlog = []
-        self.gh_helper: GHHelper = GHHelper(gh_api_token, gh_repo)
-        self.trello_helper: TrelloHelper = TrelloHelper()
+        self.gh_helper = gh_helper
+        self.trello_helper = trello_helper
 
     def refresh_ticket_backlog(self):
         next_tickets = [
             t
             for t in self.trello_helper.get_backlog_tickets()
-            if t not in self.ticket_backlog and t.assignee == self.name
+            if t not in self.ticket_backlog and t.assignee_id == self.name
         ]
         self.ticket_backlog.extend(next_tickets)
 
@@ -33,12 +31,12 @@ class Intern:
 
     def process_pr(self):
         pr = self.pr_backlog.pop(0)
-        self.trello_helper.move_to_wip(pr)
+        self.trello_helper.move_to_wip(pr.ticket_id)
         comment = self.gh_helper.get_comments(pr)
         # Do some processing with LLMs, create a new code_change
         code_change = generate_code_change("", comment)
         self.gh_helper.push_changes(code_change)
-        self.trello_helper.move_to_waiting_for_review(pr)
+        self.trello_helper.move_to_waiting_for_review(pr.ticket_id)
         pass
 
     def process_ticket(self):
@@ -48,7 +46,7 @@ class Intern:
         ticket = self.ticket_backlog.pop(0)
 
         # Move ticket to WIP
-        self.trello_helper.move_to_wip(ticket)
+        self.trello_helper.move_to_wip(ticket.id)
 
         # There should not be some PRs already assigned to this ticket (for now)
         # Call an agent to create a PR

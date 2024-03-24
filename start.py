@@ -1,5 +1,8 @@
 from dotenv import load_dotenv
 import os
+from intern import Intern
+from architect import Architect
+from reviewer import Reviewer
 
 load_dotenv()
 

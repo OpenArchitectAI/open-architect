@@ -5,8 +5,11 @@ from reviewer.processors import review_code
 from gh_helper import GHHelper
 from trello_helper import TrelloHelper
 from models import PR, CodeReview, ModifiedFile, Ticket
+from github.PullRequest import PullRequest
 
 import time
+import json
+import re
 
 
 class Reviewer:
@@ -20,12 +23,12 @@ class Reviewer:
     def refresh_pr_backlog(self):
         print("---refresh_pr_backlog---")
         next_prs = [
-            pr for pr in self.gh_helper.list_open_prs() if pr not in self.pr_backlog
+            pr for pr in self.gh_helper.list_open_prs() if pr not in self.pr_backlog  
         ]
         print(f"next_prs: {next_prs}")
         self.pr_backlog.extend(next_prs)
 
-    def simplify_pr(self, raw_pr: PR, ticket: Ticket) -> PR:
+    def simplify_pr(self, raw_pr: PullRequest, ticket: Ticket) -> PR:
         files_changed = raw_pr.get_files()
 
         files_changed_with_diffs: List[ModifiedFile] = []
@@ -52,47 +55,58 @@ class Reviewer:
 
         return pr
 
-    def submit_code_review(self, code_review: CodeReview):
-        print(code_review)
-        for comment in code_review.comments:
+    def submit_code_review(self, generated_code_review: GeneratedCodeReview):
+        print(generated_code_review.code_review)
+        for comment in generated_code_review.code_review.comments:
             print(comment)
             if not "position" in comment:
                 comment["position"] = 0
 
         print("Submitting code review...")
-        self.gh_helper.submit_code_review(code_review)
+        self.gh_helper.submit_code_review(generated_code_review.code_review)
         print("Code review submitted!")
+
+        trello_ticket_id = generated_code_review.code_review.pr.ticket_id
+        if (generated_code_review.is_valid_code and generated_code_review.resolves_ticket):
+            self.trello_helper.move_to_approved(ticket_id=trello_ticket_id)
+        else:
+            self.trello_helper.move_to_reviewed(ticket_id=trello_ticket_id)
+        
 
     def proccess_pr(self):
         print("---process_pr---")
 
         codebase = self.gh_helper.get_entire_codebase()
 
-        # Todo: Fetch the Trello ticket that corresponds to this PR
-        # ticket = self.trello_helper.get_ticket(id=pr.ticket_id)
-        placeholder_ticket = Ticket(
-            id="1",
-            title="Improve with intructions to start",
-            description="Our README should be more detailed on how to start the project.",
-            assignee_id="0",
-            status="backlog",
-        )
-
         # Get first open PR from GH that hasn't been approved yet
-        raw_pr = self.pr_backlog.pop(0)
+        pr = self.pr_backlog.pop(0)
+                        
+        # ticket_id = "660062487b43fbb4f1d5e8ea"
+                
+        # Todo: Fetch the Trello ticket that corresponds to this PR
+        ticket = self.trello_helper.get_ticket(ticket_id=pr.ticket_id)
+        
+        # return
+        # placeholder_ticket = Ticket(
+        #     id="1",
+        #     title="Improve with intructions to start",
+        #     description="Our README should be more detailed on how to start the project.",
+        #     assignee_id="0",
+        #     status="backlog",
+        # )
 
-        pr = self.simplify_pr(raw_pr=raw_pr, ticket=placeholder_ticket)
+
+        # pr = self.simplify_pr(raw_pr=pr.raw_pr, ticket=ticket)
 
         generated_code_review = review_code(
-            codebase=codebase, ticket=placeholder_ticket, pr=pr
+            codebase=codebase, ticket=ticket, pr=pr
         )
-        self.submit_code_review(code_review=generated_code_review.code_review)
+        self.submit_code_review(generated_code_review=generated_code_review)
 
     def run(self):
         while True:
+            print("---reviewer---")
             self.refresh_pr_backlog()
             if len(self.pr_backlog) > 0:
                 self.proccess_pr()
-                # Todo: remove break after reviewer is perfected. Right now, we don't want to run through all of the PRs
-                break
-            # time.sleep(10)
+            time.sleep(10)

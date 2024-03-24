@@ -1,4 +1,5 @@
 from dotenv import load_dotenv
+from threading import Thread
 import os
 
 from gh_helper import GHHelper
@@ -59,7 +60,12 @@ reviewer = Reviewer(
         trello_helper=trello_helper,
     )
 
-chat_interface.open_architect(trello_helper, gh_helper_intern)
+# chat_interface.open_architect(trello_helper, gh_helper_intern)
+intern_thread = Thread(target=intern1.run)
+# intern2_thread = Thread(target=intern2.run)
+reviewer_thread = Thread(target=reviewer.run)
+
+# chat_interface.open_architect(trello_helper, gh_helper)
 
 while True:
     # Console interface/Chat with
@@ -68,6 +74,6 @@ while True:
     # Show Trello's Backlog: everyone is like "WOW!"
 
     # Step 2: Let's get to work (3 threads) (show dashboard/console to make refresh queries + Trello and GH updates)
-    # intern1.run()
-    # intern2.run()
-    reviewer.run()
+    intern_thread.start()
+    reviewer_thread.start()
+    # stop_thread.start()

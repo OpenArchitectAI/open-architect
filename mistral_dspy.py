@@ -5,10 +5,9 @@ import backoff
 from dsp.modules.lm import LM
 
 try:
-    import mistralai
     from mistralai.client import MistralClient
     from mistralai.exceptions import MistralAPIException
-    from mistralai.models.chat_completion import ChatCompletionResponse, ChatMessage
+    from mistralai.models.chat_completion import ChatMessage
 
     mistralai_api_error = MistralAPIException
 except ImportError:

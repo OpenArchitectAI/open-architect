@@ -12,6 +12,7 @@ class Intern:
         self.pr_backlog = []
         self.gh_helper = gh_helper
         self.trello_helper = trello_helper
+        print(f"Hey! I'm {self.name}, excited to start working!")
 
     def refresh_ticket_backlog(self):
         next_tickets = [

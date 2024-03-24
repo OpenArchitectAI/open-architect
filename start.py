@@ -3,10 +3,10 @@ import os
 
 from gh_helper import GHHelper
 from trello_helper import TrelloHelper
-from intern.main import Intern
+from intern import Intern
 
 # from architect import Architect
-from reviewer.main import Reviewer
+from reviewer import Reviewer
 
 load_dotenv()
 
@@ -38,6 +38,11 @@ trello_helper = TrelloHelper(trello_api_key, trello_token, trello_board_id)
 # architect = Architect("dave")
 intern1 = Intern("alex", gh_helper=gh_helper, trello_helper=trello_helper)
 intern2 = Intern("bob", gh_helper=gh_helper, trello_helper=trello_helper)
+reviewer = Reviewer(
+        "charlie",
+        gh_helper=gh_helper,
+        trello_helper=trello_helper,
+    )
 while True:
     # Console interface/Chat with
     # architect.start_cutting_tickets_for_interns(TrelloHelper)
@@ -45,11 +50,7 @@ while True:
     # Show Trello's Backlog: everyone is like "WOW!"
 
     # Step 2: Let's get to work (3 threads) (show dashboard/console to make refresh queries + Trello and GH updates)
-    reviewer = Reviewer(
-        "charlie",
-        gh_helper=gh_helper,
-        trello_helper=trello_helper,
-    )
-    # intern1.run()
-    # intern2.run()
-    # reviewer.run()
+    break
+    intern1.run()
+    intern2.run()
+    reviewer.run()

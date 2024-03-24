@@ -15,6 +15,7 @@ class Reviewer:
         self.pr_backlog = []
         self.gh_helper = gh_helper
         self.trello_helper = trello_helper
+        print(f"Hi, my name is {self.name}. I'm ready to review some bad code.")
 
     def refresh_pr_backlog(self):
         print("---refresh_pr_backlog---")

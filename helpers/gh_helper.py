@@ -29,22 +29,18 @@ class GHHelper:
         pr = self.repo.get_pull(pr)
         pr.create_review(event="APPROVE")
 
-    def push_changes(self, branch_name, pr_title, pr_body, diff):
+    def push_changes(self, branch_name, pr_title, pr_body, new_files):
         # Parse the diff and create blobs for each modified file
         # Hoping that the diff is properly formatted
 
         modified_files = []
-        for diff_block in diff.split("diff --git"):
-            if diff_block.strip():
-                lines = diff_block.strip().split("\n")
-                file_path = lines[0].split(" b/")[1]
-                blob_content = "\n".join(lines[5:])
-                blob = self.repo.create_git_blob(blob_content, "utf-8")
-                modified_files.append(
-                    InputGitTreeElement(
-                        path=file_path, mode="100644", type="blob", sha=blob.sha
-                    )
+        for file_path, file_content in new_files.items():
+            blob = self.repo.create_git_blob(file_content, "utf-8")
+            modified_files.append(
+                InputGitTreeElement(
+                    path=file_path, mode="100644", type="blob", sha=blob.sha
                 )
+            )
 
         # Get the current commit's tree
         base_tree = self.repo.get_git_tree(sha=self.repo.get_commits()[0].sha)

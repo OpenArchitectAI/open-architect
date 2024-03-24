@@ -52,7 +52,7 @@ class Intern:
 
         # There should not be some PRs already assigned to this ticket (for now)
         # Call an agent to create a PR
-        code_change, body = generate_code_change(
+        new_files, body = generate_code_change(
             ticket, self.gh_helper.get_entire_codebase()
         )
 
@@ -63,7 +63,7 @@ class Intern:
             branch_name=branch_name,
             pr_title=ticket.title,
             pr_body=body,
-            diff=code_change,
+            new_files=new_files,
         )
 
         print("PR Created")

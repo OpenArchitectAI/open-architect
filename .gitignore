@@ -1,8 +1,7 @@
 # Environments
 .env
 .venv
-env/
-venv/
+*env/
 ENV/
 env.bak/
 venv.bak/
@@ -12,3 +11,9 @@ venv.bak/
 
 # Mac OS
 .DS_Store
+
+# PyCache
+**/__pycache__
+
+# Private keys
+*.pem

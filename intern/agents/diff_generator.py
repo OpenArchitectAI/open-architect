@@ -1,11 +1,14 @@
 import dspy
+import json
+
+from models import Codebase, Ticket
 
 
 # Define the agent
 class DiffGeneratorSignature(dspy.Signature):
     codebase = dspy.InputField()
-    task_description = dspy.InputField()
-    git_diff = dspy.OutputField()
+    ticket = dspy.InputField()
+    git_diff = dspy.OutputField(desc="Give ONLY the git diff")
 
 
 class DiffGenerator(dspy.Module):
@@ -14,8 +17,13 @@ class DiffGenerator(dspy.Module):
 
         self.diff_generator = dspy.Predict(DiffGeneratorSignature)
 
-    def forward(self, codebase, task_description):
+    def forward(self, codebase: Codebase, ticket: Ticket):
         # Get the diff
-        diff = self.diff_generator(codebase=codebase, task_description=task_description)
+        print("Generating diff")
+        diff = self.diff_generator(
+            codebase=json.dumps(codebase.model_dump()),
+            ticket=json.dumps(ticket.model_dump()),
+        )
+        print("Diff generated")
 
-        return diff
+        return diff.git_diff

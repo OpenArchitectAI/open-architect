@@ -2,6 +2,9 @@ from typing import Dict
 from pydantic import BaseModel
 
 
+ticket_stages = ["backlog", "todo", "wip", "review", "done"]
+
+
 class Ticket(BaseModel):
     id: int
     title: str

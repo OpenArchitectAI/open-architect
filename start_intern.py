@@ -2,6 +2,9 @@ from intern.main import Intern
 from dotenv import load_dotenv
 import os
 from models import Ticket
+import openai, json
+
+openai.api_key = json.loads(open("creds.json").read())["openai"]
 
 load_dotenv()
 
@@ -18,8 +21,8 @@ intern1 = Intern("alex", gh_api_token, gh_repo, gh_repo)
 intern1.ticket_backlog = [
     Ticket(
         id=0,
-        title="Ticket 1",
-        description="This is a ticket",
+        title="Improve README",
+        description="Our README does not include enough information to explain what this project does. Explain what the routes are for and this app is meant for.",
         assignee_id=0,
         status="backlog",
     )

@@ -1,5 +1,4 @@
 import streamlit as st
-import requests
 from architect import main as architect
 
 

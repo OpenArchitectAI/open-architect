@@ -10,11 +10,11 @@ import time
 
 
 class Reviewer:
-    def __init__(self, name, gh_api_token, gh_repo, trello_helper):
+    def __init__(self, name, gh_helper, trello_helper):
         self.name = name
         self.pr_backlog = []
-        self.gh_helper: GHHelper = GHHelper(gh_api_token, gh_repo)
-        self.trello_helper: TrelloHelper = trello_helper
+        self.gh_helper = gh_helper
+        self.trello_helper = trello_helper
 
     def refresh_pr_backlog(self):
         print("---refresh_pr_backlog---")

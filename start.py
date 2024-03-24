@@ -28,16 +28,7 @@ if (
     print(
         "Please run the init_connections.py script to set up the environment variables"
     )
-
-
-# Write them back to the .env file
-with open(".env", "w") as f:
-    f.write(f"GITHUB_REPO_URL={gh_repo}\n")
-    f.write(f"GITHUB_TOKEN={gh_api_token}\n")
-    f.write(f"TRELLO_API_KEY={trello_api_key}\n")
-    f.write(f"TRELLO_API_SECRET={trello_api_secret}\n")
-    f.write(f"TRELLO_TOKEN={trello_token}\n")
-    f.write(f"TRELLO_BOARD_ID={trello_board_id}\n")
+    exit(1)
 
 
 gh_helper = GHHelper(gh_api_token, gh_repo)
@@ -45,8 +36,8 @@ trello_helper = TrelloHelper(trello_api_key, trello_token, trello_board_id)
 
 # Step 1: With User input (streamit), define tickets, push to Trello's Backlog
 # architect = Architect("dave")
-# intern1 = Intern("alex")
-# intern2 = Intern("bob")
+intern1 = Intern("alex", gh_helper=gh_helper, trello_helper=trello_helper)
+intern2 = Intern("bob", gh_helper=gh_helper, trello_helper=trello_helper)
 while True:
     # Console interface/Chat with
     # architect.start_cutting_tickets_for_interns(TrelloHelper)
@@ -56,10 +47,9 @@ while True:
     # Step 2: Let's get to work (3 threads) (show dashboard/console to make refresh queries + Trello and GH updates)
     reviewer = Reviewer(
         "charlie",
-        gh_api_token=os.environ.get("GITHUB_TOKEN"),
-        gh_repo=os.environ.get("GITHUB_REPO_URL"),
+        gh_helper=gh_helper,
         trello_helper=trello_helper,
     )
     # intern1.run()
     # intern2.run()
-    reviewer.run()
+    # reviewer.run()

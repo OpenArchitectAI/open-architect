@@ -5,10 +5,9 @@
 from trello import TrelloClient
 import concurrent.futures
 from pydantic import BaseModel
-from typing import Any, Union, List
+from typing import Any, List
 from openai import OpenAI
 import time
-import json
 import os 
 
 OPENAI_API_KEY = ""

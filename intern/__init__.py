@@ -2,6 +2,7 @@ from gh_helper import add_ticket_info_to_pr_body
 from intern.processors import better_code_change, generate_code_change
 from random import choice
 import time
+from threading import Thread
 from typing import List
 from models import Ticket
 
@@ -12,12 +13,14 @@ from trello_helper import TrelloHelper
 class Intern:
     def __init__(self, name, gh_helper: GHHelper, trello_helper: TrelloHelper):
         self.name = name
-        self.id = choice(trello_helper.get_labels())
+        self.id = choice(trello_helper.get_intern_list())
         self.ticket_backlog: List[Ticket] = []
         self.pr_backlog = []
         self.gh_helper = gh_helper
         self.trello_helper = trello_helper
-        print(f"Hey! I'm {self.name}, excited to start working!")
+        self.fetch_thread = Thread(target=self.refresh_loop)
+        self.process_thread = Thread(target=self.process_loop)
+        print(f"[INTERN {self.name}] Hey! I'm {self.name}, excited to start working!")
 
     def refresh_ticket_backlog(self):
         # for ticket in self.trello_helper.get_backlog_tickets():
@@ -49,7 +52,7 @@ class Intern:
         # Do some processing with LLMs, create a new code_change
         code_change = generate_code_change("", comment)
         self.gh_helper.push_changes(code_change, pr.ticket_id, pr.assignee_id)
-        print("Moving card to waiting for review") 
+        print(f"[INTERN {self.name}] Moving card to waiting for review")
         self.trello_helper.move_to_waiting_for_review(pr.ticket_id)
         pass
 
@@ -68,7 +71,8 @@ class Intern:
             ticket, self.gh_helper.get_entire_codebase()
         )
 
-        print("Pushing changes to a PR")
+
+        print(f"[INTERN {self.name}] Pushing changes to a PR")
         # Push the changes to the PR
         branch_name = f"{ticket.id}_{ticket.title.lower().replace(' ', '_')}"
         self.gh_helper.push_changes(
@@ -80,22 +84,40 @@ class Intern:
             author_id=ticket.assignee_id,
         )
 
-        print("PR Created")
         
         self.trello_helper.move_to_waiting_for_review(ticket_id=ticket.id)
+        print(f"[INTERN {self.name}] PR Created")
 
-    def run(self):
-        # Two threads are created running in an infinite loop
-        # The first one listens to refresh commands and refreshes the backlogs
-        # The second one consumes the backlogs and processes the tickets and PRs
+    def refresh_loop(self):
+        while True:
+            cmd = input(f"[INTERN {self.name}] Enter 'p' to fetch new PRs, 't' to fetch new tickets, 'q' to quit: ")
+            if cmd == "p":
+                self.refresh_pr_backlog()
+            elif cmd == "t":
+                self.refresh_ticket_backlog()
+            elif cmd == "q":
+                self.process_thread.join()
+                self.fetch_thread.join()
 
-        # Different implementation than comment above but same idea
+    def process_loop(self):
+        number_of_attempts = 0
         while True:
             if self.pr_backlog:
                 self.process_pr()
             elif self.ticket_backlog:
                 self.process_ticket()
             else:
-                self.refresh_ticket_backlog()
-                self.refresh_pr_backlog()
-                time.sleep(10)
+                print(f"[INTERN {self.name}] No tickets or PRs to process, idling...")
+                number_of_attempts += 1
+                if number_of_attempts == 5:
+                    print(f"[INTERN {self.name}] No more work to do, bye bye!")
+                    self.fetch_thread.join()
+                    self.process_thread.join()
+                time.sleep(30)
+
+    def run(self):
+        # Two threads are created running in an infinite loop
+        # The first one listens to refresh commands and refreshes the backlogs
+        # The second one consumes the backlogs and processes the tickets and PRs
+        self.fetch_thread.start()
+        self.process_thread.start()

@@ -56,7 +56,6 @@ class GHHelper:
                 open_prs.append(PR(id=pr.number, title=pr.title, description=pr.body, assignee_id=assignee_id, ticket_id=ticket_id, files_changed=files_changed_with_diffs, raw_pr=pr))
         return open_prs
     def get_pr(self, pr_number):
-        print("---get_pr---")
         try:
             pr = self.repo.get_pull(pr_number)
             return pr
@@ -125,7 +124,7 @@ class GHHelper:
         # Create a new pull request
         base_branch = "main"  # Replace with the target branch for the pull request
         head = f"{self.repo.owner.login}:{branch_name}"  # Update the head parameter
-        pr = self.repo.create_pull(
+        self.repo.create_pull(
             title=pr_title, body=add_ticket_info_to_pr_body(ticket_id, author_id, pr_body), head=head, base=base_branch
         )
 

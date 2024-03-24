@@ -10,7 +10,7 @@ import time
 import json
 import os 
 
-OPENAI_API_KEY = "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"
+OPENAI_API_KEY = ""
 os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
 
 class Ticket(BaseModel):
@@ -156,16 +156,16 @@ def create_subtasks(project_description):
     """
     try:
         client = OpenAI(api_key=OPENAI_API_KEY)
-        questionPrompt = f"""Given the following project description {project_description}, please break it down into smaller tasks that can be accomplished to complete the project. Each task should include a title and a detailed description of the task. The subtasks should all be small enough to be completed in a single day and should represent a micro chunk of work that a user can do to build up to solving the overall task. The response should be in the following format
+        questionPrompt = f"""Given the following project description {project_description}, please break it down into smaller tasks that can be accomplished to complete the project. Each task should include a title and a detailed description of the task. The subtasks should all be small enough to be completed in a single day and should represent a micro chunk of work that a user can do to build up to solving the overall task. Focus only on engineering tasks, don't include design or user testing etc. The response should be in the following format
         
-        Brief description of the task and breakdown - 
+        Brief description of the task and breakdown. Don't include 'Title of the task' in the output, replace it with the actual title - 
         
-        1. SubTask 1: Title of the task
-            Brief description of the task
-        2. SubTask 2: Title of the task
-            Brief description of the task
-        3. SubTask 3: Title of the task
-            Brief description of the task
+        1. Title of the task
+            Detailed description of the task with a breakdown of the steps that need to be taken to complete the task
+        2. Title of the task
+            Detailed description of the task with a breakdown of the steps that need to be taken to complete the task
+        3. Title of the task
+            Detailed description of the task with a breakdown of the steps that need to be taken to complete the task
         """
 
         response = client.chat.completions.create(

@@ -1,6 +1,26 @@
+from typing import List
+
 from github import Auth, Github, InputGitTreeElement, InputGitAuthor
 
-from models import CodeReview, Codebase
+from models import CodeReview, Codebase, Ticket, PR
+
+TICKET_DELIMITER = "Ticket: "
+AUTHOR_DELIMITER = "Author: "
+
+def add_ticket_info_to_pr_body(ticket_id, author_id, pr_body):
+    return f"{TICKET_DELIMITER}{ticket_id}\n{AUTHOR_DELIMITER}{author_id}\n{pr_body}"
+
+def extract_ticket_info_from_pr_body(pr_body):
+    ticket_id = None
+    author_id = None
+    lines = pr_body.split("\n")
+    for line in lines:
+        if line.startswith(TICKET_DELIMITER):
+            ticket_id = line.replace(TICKET_DELIMITER, "")
+        if line.startswith(AUTHOR_DELIMITER):
+            author_id = line.replace(AUTHOR_DELIMITER, "")
+
+    return ticket_id, author_id
 
 
 class GHHelper:
@@ -14,8 +34,8 @@ class GHHelper:
         except Exception as e:
             print(f"Error: {e}")
 
-    def list_open_prs(self):
-        return self.repo.get_pulls(state="open")
+    def list_open_prs(self) -> List[PR]:
+        return [PR(id=pr.number, title=pr.title, description=pr.body, assignee_id=extract_ticket_info_from_pr_body(pr.body)[1], ticket_id=extract_ticket_info_from_pr_body(pr.body)[0]) for pr in self.repo.get_pulls(state="open")]
 
     def get_pr(self, pr_number):
         print("---get_pr---")
@@ -46,7 +66,7 @@ class GHHelper:
             comments=code_review.comments,
         )
 
-    def push_changes(self, branch_name, pr_title, pr_body, new_files):
+    def push_changes(self, branch_name, pr_title, pr_body, new_files, ticket_id, author_id):
         # Parse the diff and create blobs for each modified file
         # Hoping that the diff is properly formatted
 
@@ -88,7 +108,7 @@ class GHHelper:
         base_branch = "main"  # Replace with the target branch for the pull request
         head = f"{self.repo.owner.login}:{branch_name}"  # Update the head parameter
         pr = self.repo.create_pull(
-            title=pr_title, body=pr_body, head=head, base=base_branch
+            title=pr_title, body=add_ticket_info_to_pr_body(ticket_id, author_id, pr_body), head=head, base=base_branch
         )
 
     def get_entire_codebase(self) -> Codebase:

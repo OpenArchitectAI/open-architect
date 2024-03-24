@@ -38,7 +38,7 @@ intern1 = Intern("alex", gh_helper, trello_helper)
 intern1.ticket_backlog = [
     Ticket(
         id="660056eb92fd3a0e455d8700",
-        title="Add a route to stop the API - 2",
+        title="Add a route to stop the API - 4",
         description="This route should stop the API or even kill the process",
         assignee_id="65ffd377a46cfb71ed651901",
         status="backlog",

@@ -26,7 +26,7 @@ class Intern:
         next_prs = [
             pr
             for pr in self.gh_helper.list_open_prs()
-            if pr not in self.pr_backlog and pr.assignee == self.name
+            if pr not in self.pr_backlog and pr.assignee_id == self.name
         ]
         self.pr_backlog.extend(next_prs)
 
@@ -36,7 +36,7 @@ class Intern:
         comment = self.gh_helper.get_comments(pr)
         # Do some processing with LLMs, create a new code_change
         code_change = generate_code_change("", comment)
-        self.gh_helper.push_changes(code_change)
+        self.gh_helper.push_changes(code_change, pr.ticket_id, pr.assignee_id)
         self.trello_helper.move_to_waiting_for_review(pr.ticket_id)
         pass
 
@@ -63,6 +63,8 @@ class Intern:
             pr_title=ticket.title,
             pr_body=body,
             new_files=new_files,
+            ticket_id=ticket.id,
+            author_id=ticket.assignee_id,
         )
 
         print("PR Created")

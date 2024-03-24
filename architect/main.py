@@ -7,6 +7,9 @@ from pydantic import BaseModel
 from typing import Any, Union, List
 from openai import OpenAI
 import time
+import json
+
+OPENAI_API_KEY = ""
 
 class Ticket(BaseModel):
     title: str
@@ -144,17 +147,33 @@ def create_subtasks(project_description):
     """
     This function will be responsible for breaking up the overall project description into multiple smaller tasks and then getting user feedback on them. 
     """
-    # Split the project description into multiple tasks
-    tasks = project_description.split('.')
-    
-    # Get user feedback on the tasks
-    for task in tasks:
-        print(f"Task: {task}")
-        feedback = input("Do you want to create a ticket for this task? (yes/no): ")
+    try:
+        client = OpenAI(api_key=OPENAI_API_KEY)
+        questionPrompt = f"""Given the following project description {project_description}, please break it down into smaller tasks that can be accomplished to complete the project. Each task should include a title and a detailed description of the task. The subtasks should all be small enough to be completed in a single day and should represent a micro chunk of work that a user can do to build up to solving the overall task. The response should be in the following format
         
-        if feedback == 'yes':
-            # Create a ticket for the task
-            create_ticket('BOARD_ID', 'LIST_ID', task, '')
-            
-    return "Project broken up into tasks and tickets created."
+        Brief description of the task and breakdown - 
+        
+        1. SubTask 1: Title of the task
+            Brief description of the task
+        2. SubTask 2: Title of the task
+            Brief description of the task
+        3. SubTask 3: Title of the task
+            Brief description of the task
+        """
+
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo-1106",
+            messages=[
+                {"role": "system", "content": "You are a senior staff engineer, who is responsible for breaking up large complex tasks into small, granular subtasks that more junior engineers can easily work through and execute on."},
+                {"role": "user", "content": questionPrompt},
+            ],
+            response_format={ "type": "json_object" }
+        )
+        subtasks = response.choices[0].message.content
+
+        return subtasks
+
+    except Exception as e:
+        print("Failed to generate subtasks with error " + str(e))
+        return "Failed to generate subtasks with error " + str(e)
 

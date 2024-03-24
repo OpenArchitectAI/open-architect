@@ -2,31 +2,30 @@
     This file will handle setting up an agent that will essentially handle having a conversation with the user and then based on that conversation, break the task up into tickets and then actually create thoe tickets. It will be implemented both through prompts and through DsPy later on.
 """
 
-from trello import TrelloClient
+from trello_helper import *
 import concurrent.futures
 from pydantic import BaseModel
 from typing import Any, List
 from openai import OpenAI
 import time
 import os 
+from models import Ticket
+
 
 OPENAI_API_KEY = ""
 os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
 
 
-class Ticket(BaseModel):
-    title: str
-    description: str
-
 
 class ArchitectAgentRequest(BaseModel):
     question: str
     history: Any
-
+    trello_client: Any
 
 class CreateTicketsRequest(BaseModel):
-    tickets: List[Ticket]
-
+    question: str
+    history: Any
+    trello_client: Any
 
 class CreateSubtasksRequest(BaseModel):
     question: str
@@ -53,8 +52,13 @@ def architect_agent(architectAgentRequest: ArchitectAgentRequest):
              
             Ask them 3-4 clarifying questions for more details about any necessary backend, front end and hosting components of the project.
              
-            Once you know all of the details of the project in order to execute exactly what the user wants, you can then break down the task into smaller tickets and then create those tickets. You have been given the following task: {architectAgentRequest.question}."""},
+            Once you know all of the details of the project in order to execute exactly what the user wants, you can then break down the task into smaller tickets and then create those tickets. 
+            
+            After you have all the subtasks you must ask the user if the subtasks are good and then proceed to creating the tasks. Don't end the conversation without asking to create the tasks and creating the tasks.
+             
+            You have been given the following task: {architectAgentRequest.question}."""},
             {"role": "user", "content": architectAgentRequest.question}]
+        
         tools = [
             {
                 "type": "function",
@@ -82,13 +86,14 @@ def architect_agent(architectAgentRequest: ArchitectAgentRequest):
             tools=tools,
             tool_choice="auto",
         )
-        afterFunctionCall = time.time()
 
         response_message = response.choices[0].message
         tool_calls = response_message.tool_calls
         function_request_mapping = {
             "create_tickets": CreateTicketsRequest(
-                tickets = [Ticket(title="Title", description="Description") for i in range(3)]
+                question=architectAgentRequest.question,
+                history=architectAgentRequest.history,
+                trello_client=architectAgentRequest.trello_client,
             ),
             "create_subtasks": CreateSubtasksRequest(
                 question=architectAgentRequest.question,
@@ -116,40 +121,64 @@ def architect_agent(architectAgentRequest: ArchitectAgentRequest):
     return run_conversation()
 
 
-# Ticket creation tool
-client = TrelloClient(
-    api_key="YOUR_KEY",
-    api_secret="YOUR_SECRET",
-    token="YOUR_TOKEN",
-    token_secret="YOUR_TOKEN_SECRET",
-)
 
-
-def create_ticket(board_id, list_id, name, desc):
+def create_tickets(createTicketsRequest: CreateTicketsRequest):
     """
-    This function will be responsible for creating the tickets based on the user input and then pushing them to the Trello board.
+        This function will be responsible for creating multiple tickets in parallel.
     """
-    board = client.get_board(board_id)
-    trello_list = board.get_list(list_id)
-    trello_list.add_card(name, desc)
+    trello_client = createTicketsRequest.trello_client
+    
+    # Given the conversation history, create tickets for each subtask
+    try:
+        client = OpenAI(api_key=OPENAI_API_KEY)
+        questionPrompt = f"""Given the following subtask information {createTicketsRequest.history}, generate a list of tasks in the following json format 
 
-    # Return a response saying that it has created tickets with the corresponding titles and descriptions
-    return f"Created ticket with title: {name} and description: {desc}"
+        {
+            "title": "title of the tickt"
+            "description": "description of the ticket"
+        }
+        
+        You need to cover all of the subtasks that are mentioned and create a ticket for each one. Each ticket should include the title and description of the subtask. The respponse should be a list of these json objects for each subtask.
+        """
 
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo-1106",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a senior staff engineer, who is responsible for breaking up large complex tasks into small, granular subtasks that more junior engineers can easily work through and execute on.",
+                },
+                {"role": "user", "content": questionPrompt},
+            ],
+            # response_format={ "type": "json_object" }
+        )
+        subtasks = response.choices[0].message.content
 
-def create_tickets(tickets):
-    """
-    This function will be responsible for creating multiple tickets in parallel.
-    """
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        for ticket in tickets:
-            executor.submit(
-                create_ticket,
-                "BOARD_ID",
-                "LIST_ID",
-                ticket["title"],
-                ticket["description"],
-            )
+        # Create a list of ticket objects from the subtasks and call create
+        tickets = []
+        for subtask in subtasks:
+            ticket = Ticket(title=subtask["title"], description=subtask["description"])
+            tickets.append(ticket)
+
+        createdTickets = trello_client.push_tickets_to_backlog_and_assign(tickets)
+
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo-1106",
+            messages=[
+                {
+                    "role": "system", "content": "You are a senior staff engineer, who has just created several tasks for a project. You now need to let the user know which tasks have been created so that they can be worked on.  Let them know the titles of the tasks that have been created and say that you will get to working on them right away.",
+                },
+                {"role": "user", "content": f"I've just created the following tickets {createdTickets}"},
+            ],
+            # response_format={ "type": "json_object" }
+        )
+        finalResponse = response.choices[0].message.content
+        return finalResponse
+
+    except Exception as e:
+        print("Failed to generate subtasks with error " + str(e))
+        return "Failed to generate subtasks with error " + str(e)
+
 
 
 # Define the tool for breaking up the overall project description into multiple smaller tasks and then getting user feedback on them

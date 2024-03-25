@@ -1,7 +1,28 @@
-# MoarSWEPls!
+# MoarSWEPls by OpenArchitect
 
-Your automated SWE fleet to get your tickets from the Backlog to Prod!
+Orchestrate your fleet of AI software designers, engineers and reviewers!
 
+Just create tickets (or have an AI architect assist you), and let the agents do the work. Your approval is required to merge PRs, so no bug or wrong code is ever introduced without your approval!
+
+## Setup
+
+1. Clone this repo
+2. Install dependencies with `pip install -r requirements.txt`
+3. Enter the infos related to the repository in which you want to work in `settings.json` or run `oa setup`
+3. Profit
+
+### How to connect to Github
+
+1. Be part of the org of your repo, or the owner of the repo.
+2. Go to https://github.com/settings/tokens?type=beta and create a personnal access token for the repo
+3. Run `oa setup github` to provide the path to your repo (in the format *owner/repo_name*) and the access token, or put them in `.env`
+
+## How to run
+
+Run your fleet with:
+- `oa start intern` to spawn a developer that will process tickets and open PRs with code.
+- `oa start reviewer` to spawn a reviewer that will review PRs and ask for changes.
+- `oa start architect` to spawn an architect running in a chatbot that will create code tickets with you.
 
 ## Connecting to the GH Client
 

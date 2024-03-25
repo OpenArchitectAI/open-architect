@@ -71,11 +71,11 @@ class TrelloHelper:
             token=trello_token,
         )
 
-        print("TrelloHelper initialized")
+        # print("TrelloHelper initialized")
 
         board = self.client.get_board(trello_board_id)
-        print(f"Selected board: {board.name}")
-        print(f"Board lists: {board.list_lists()}")
+        # print(f"Selected board: {board.name}")
+        # print(f"Board lists: {board.list_lists()}")
         self.list_ids = {list.name: list.id for list in board.list_lists()}
         expected_values = [v.value for v in TicketStatus]
         for val in expected_values:
@@ -94,9 +94,9 @@ class TrelloHelper:
             assignee_id=card.labels[0].id if card.labels else None,
         )
 
-    def get_backlog_tickets(self):
+    def get_tickets_todo_list(self):
         cards = self.client.get_list(
-            self.list_ids[TicketStatus.BACKLOG.value]
+            self.list_ids[TicketStatus.TODO.value]
         ).list_cards()
         if not cards:
             return []

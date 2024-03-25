@@ -1,6 +1,6 @@
 import dspy
 import json
-from mistral_dspy import Mistral
+from src.lib.mistral_dspy import Mistral
 
 mistral_key = json.load(open("creds.json"))["mistral"]
 

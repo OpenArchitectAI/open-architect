@@ -1,18 +1,18 @@
-from gh_helper import add_ticket_info_to_pr_body
 from intern.processors import better_code_change, generate_code_change
 from random import choice
 import time
 from threading import Thread
 from typing import List
-from models import Ticket
+from src.models import Ticket
 
-from gh_helper import GHHelper
-from trello_helper import TrelloHelper
+from src.helpers.github import GHHelper
+from src.helpers.trello import TrelloHelper
 
 REFRESH_EVERY = 10
 PROCESS_EVERY = 5
 MAX_REFRESH_CYCLES_WITHOUT_WORK = 50000
 MAX_PROCESS_CYCLES_WITHOUT_WORK = 10000
+
 
 class Intern:
     def __init__(self, name, gh_helper: GHHelper, trello_helper: TrelloHelper):
@@ -34,15 +34,17 @@ class Intern:
         #     for t in self.trello_helper.get_backlog_tickets()
         #     if t not in self.ticket_backlog and t.assignee_id == self.id
         # ]
+        print(f"[INTERN {self.name}] Looking on Trello for new assigned tickets")
         next_tickets = [
             t
             for t in self.trello_helper.get_backlog_tickets()
-            if t not in self.ticket_backlog and t.assignee_id == self.id
+            if t not in self.ticket_backlog
         ]
         self.ticket_backlog.extend(next_tickets)
         return len(next_tickets) == 0
 
     def refresh_pr_backlog(self):
+        print(f"[INTERN {self.name}] Looking on GitHub for reviewed PRs")
         next_prs = [
             pr
             for pr in self.gh_helper.list_open_prs()
@@ -76,7 +78,6 @@ class Intern:
             ticket, self.gh_helper.get_entire_codebase()
         )
 
-
         print(f"[INTERN {self.name}] Pushing changes to a PR")
         # Push the changes to the PR
         branch_name = f"{ticket.id}_{ticket.title.lower().replace(' ', '_')}"
@@ -89,14 +90,13 @@ class Intern:
             author_id=ticket.assignee_id,
         )
 
-        
         self.trello_helper.move_to_waiting_for_review(ticket_id=ticket.id)
         print(f"[INTERN {self.name}] PR Created")
 
     def refresh_loop(self):
         cycles_without_work = 0
         while True:
-            if (not self.refresh_pr_backlog() and not self.refresh_ticket_backlog()):
+            if not self.refresh_pr_backlog() and not self.refresh_ticket_backlog():
                 cycles_without_work += 1
                 if cycles_without_work == MAX_REFRESH_CYCLES_WITHOUT_WORK:
                     print(f"[INTERN {self.name}] No more work to do, bye bye!")

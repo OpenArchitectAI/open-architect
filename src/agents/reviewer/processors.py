@@ -1,9 +1,12 @@
 import dspy
 
-from reviewer.agents.code_review_generator import GeneratedCodeReview, ReviewerAgent
+from src.agents.reviewer.generators.code_review_generator import (
+    GeneratedCodeReview,
+    ReviewerAgent,
+)
 
-from language_models import gpt4
-from models import Codebase, Ticket, PR
+from src.language_models import gpt4
+from src.models import Codebase, Ticket, PR
 
 
 def fix_code(codebase: Codebase, ticket: Ticket, pr: PR):

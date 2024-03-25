@@ -2,12 +2,13 @@ from dotenv import load_dotenv
 from threading import Thread
 import os
 
-from gh_helper import GHHelper
-from trello_helper import TrelloHelper
-from intern import Intern
+from src.helpers.github import GHHelper
+from src.helpers.trello import TrelloHelper
 
-import chat_interface
-from reviewer import Reviewer
+from src.agents.intern import Intern
+from src.agents.reviewer import Reviewer
+
+import src.chat_interface as chat_interface
 
 load_dotenv()
 
@@ -52,10 +53,10 @@ trello_helper = TrelloHelper(trello_api_key, trello_token, trello_board_id)
 
 intern = Intern("alex", gh_helper=gh_helper_intern, trello_helper=trello_helper)
 reviewer = Reviewer(
-        "charlie",
-        gh_helper=gh_helper_reviewer,
-        trello_helper=trello_helper,
-    )
+    "charlie",
+    gh_helper=gh_helper_reviewer,
+    trello_helper=trello_helper,
+)
 
 intern_thread = Thread(target=intern.run)
 reviewer_thread = Thread(target=reviewer.run)

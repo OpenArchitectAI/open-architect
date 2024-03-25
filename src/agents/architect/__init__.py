@@ -2,14 +2,14 @@
     This file will handle setting up an agent that will essentially handle having a conversation with the user and then based on that conversation, break the task up into tickets and then actually create thoe tickets. It will be implemented both through prompts and through DsPy later on.
 """
 
-from trello_helper import *
+from src.helpers.trello import *
 import concurrent.futures
 from pydantic import BaseModel
 from typing import Any, List
 from openai import OpenAI
 import time
-import os 
-from models import Ticket
+import os
+from src.models import Ticket
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -22,10 +22,12 @@ class ArchitectAgentRequest(BaseModel):
     history: Any
     trello_client: Any
 
+
 class CreateTicketsRequest(BaseModel):
     question: str
     history: Any
     trello_client: Any
+
 
 class CreateSubtasksRequest(BaseModel):
     question: str
@@ -43,7 +45,9 @@ def architect_agent(architectAgentRequest: ArchitectAgentRequest):
     def run_conversation():
 
         messages = [
-            {"role": "system", "content": f"""
+            {
+                "role": "system",
+                "content": f"""
              You are a principal software engineer who is responsible for mentoring engineers and breaking down tasks into smaller tickets. You want to first ask the user several probing questions to better understand the feature that they are trying to build.  
              
             Ask them questions to better explain different aspects of the feature that they are asking for. 
@@ -56,9 +60,11 @@ def architect_agent(architectAgentRequest: ArchitectAgentRequest):
              
             Create the tasks for the user. - "Creating your tasks".
              
-            You have been given the following task: {architectAgentRequest.question}."""},
-            {"role": "user", "content": architectAgentRequest.question}]
-        
+            You have been given the following task: {architectAgentRequest.question}.""",
+            },
+            {"role": "user", "content": architectAgentRequest.question},
+        ]
+
         tools = [
             {
                 "type": "function",
@@ -124,13 +130,12 @@ def architect_agent(architectAgentRequest: ArchitectAgentRequest):
     return run_conversation()
 
 
-
 def create_tasks(createTicketsRequest: CreateTicketsRequest):
     """
-        This function will be responsible for creating multiple tickets in parallel.
+    This function will be responsible for creating multiple tickets in parallel.
     """
     trello_client = createTicketsRequest.trello_client
-    
+
     # Given the conversation history, create tickets for each subtask
     try:
         client = OpenAI(api_key=OPENAI_API_KEY)
@@ -170,9 +175,13 @@ def create_tasks(createTicketsRequest: CreateTicketsRequest):
             model="gpt-3.5-turbo-1106",
             messages=[
                 {
-                    "role": "system", "content": "You are a senior staff engineer, who has just created several tasks for a project. You now need to let the user know which tasks have been created so that they can be worked on.  Let them know the titles of the tasks that have been created and say that you will get to working on them right away.",
+                    "role": "system",
+                    "content": "You are a senior staff engineer, who has just created several tasks for a project. You now need to let the user know which tasks have been created so that they can be worked on.  Let them know the titles of the tasks that have been created and say that you will get to working on them right away.",
                 },
-                {"role": "user", "content": f"I've just created the following tickets {createdTickets}"},
+                {
+                    "role": "user",
+                    "content": f"I've just created the following tickets {createdTickets}",
+                },
             ],
             # response_format={ "type": "json_object" }
         )
@@ -182,7 +191,6 @@ def create_tasks(createTicketsRequest: CreateTicketsRequest):
     except Exception as e:
         print("Failed to generate subtasks with error " + str(e))
         return "Failed to generate subtasks with error " + str(e)
-
 
 
 # Define the tool for breaking up the overall project description into multiple smaller tasks and then getting user feedback on them

@@ -2,13 +2,15 @@ from typing import List
 
 from github import Auth, Github, InputGitTreeElement, InputGitAuthor
 
-from models import CodeReview, Codebase, ModifiedFile, Ticket, PR
+from src.models import CodeReview, Codebase, ModifiedFile, Ticket, PR
 
 TICKET_DELIMITER = "Ticket: "
 AUTHOR_DELIMITER = "Author: "
 
+
 def add_ticket_info_to_pr_body(ticket_id, author_id, pr_body):
     return f"{TICKET_DELIMITER}{ticket_id}\n{AUTHOR_DELIMITER}{author_id}\n{pr_body}"
+
 
 def extract_ticket_info_from_pr_body(pr_body):
     ticket_id = None
@@ -38,7 +40,10 @@ class GHHelper:
         open_prs = []
         for pr in self.repo.get_pulls(state="open"):
             # Check if PR is not approved or not changes requested
-            if not any(review.state in ["APPROVED", "CHANGES_REQUESTED"] for review in pr.get_reviews()):
+            if not any(
+                review.state in ["APPROVED", "CHANGES_REQUESTED"]
+                for review in pr.get_reviews()
+            ):
                 files_changed = pr.get_files()
                 files_changed_with_diffs = []
                 for file in files_changed:
@@ -53,10 +58,20 @@ class GHHelper:
                         )
                     )
                 ticket_id, assignee_id = extract_ticket_info_from_pr_body(pr.body)
-                open_prs.append(PR(id=pr.number, title=pr.title, description=pr.body, assignee_id=assignee_id, ticket_id=ticket_id, files_changed=files_changed_with_diffs, raw_pr=pr))
+                open_prs.append(
+                    PR(
+                        id=pr.number,
+                        title=pr.title,
+                        description=pr.body,
+                        assignee_id=assignee_id,
+                        ticket_id=ticket_id,
+                        files_changed=files_changed_with_diffs,
+                        raw_pr=pr,
+                    )
+                )
         return open_prs
+
     def get_pr(self, pr_number):
-        print("---get_pr---")
         try:
             pr = self.repo.get_pull(pr_number)
             return pr
@@ -74,8 +89,8 @@ class GHHelper:
 
     def mark_pr_as_approved(self, pr):
         pr = self.repo.get_pull(pr)
-        pr.create_review(event="APPROVE")        
-        
+        pr.create_review(event="APPROVE")
+
     def submit_code_review(self, code_review: CodeReview):
         pr = self.repo.get_pull(number=code_review.pr.id)
         pr.create_review(
@@ -84,7 +99,9 @@ class GHHelper:
             comments=code_review.comments,
         )
 
-    def push_changes(self, branch_name, pr_title, pr_body, new_files, ticket_id, author_id):
+    def push_changes(
+        self, branch_name, pr_title, pr_body, new_files, ticket_id, author_id
+    ):
         # Parse the diff and create blobs for each modified file
         # Hoping that the diff is properly formatted
 
@@ -125,8 +142,11 @@ class GHHelper:
         # Create a new pull request
         base_branch = "main"  # Replace with the target branch for the pull request
         head = f"{self.repo.owner.login}:{branch_name}"  # Update the head parameter
-        pr = self.repo.create_pull(
-            title=pr_title, body=add_ticket_info_to_pr_body(ticket_id, author_id, pr_body), head=head, base=base_branch
+        self.repo.create_pull(
+            title=pr_title,
+            body=add_ticket_info_to_pr_body(ticket_id, author_id, pr_body),
+            head=head,
+            base=base_branch,
         )
 
     def get_entire_codebase(self) -> Codebase:

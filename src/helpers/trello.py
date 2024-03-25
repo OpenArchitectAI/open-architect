@@ -5,13 +5,14 @@ import requests
 
 from trello import TrelloClient
 
-from constants import TicketStatus
-from models import Ticket
+from src.constants import TicketStatus
+from src.models import Ticket
 
 HEADERS = {
     "Accept": "application/json",
     "Content-Type": "application/json",
 }
+
 
 class CustomTrelloClient(TrelloClient):
     # Patch, because the base one is not working
@@ -34,7 +35,12 @@ class CustomTrelloClient(TrelloClient):
     def fetch_json(
         self,
         uri_path,
-        http_method='GET', headers=None, query_params=None, post_args=None, files=None):
+        http_method="GET",
+        headers=None,
+        query_params=None,
+        post_args=None,
+        files=None,
+    ):
         if headers is None:
             headers = HEADERS
         if post_args is None:
@@ -42,17 +48,19 @@ class CustomTrelloClient(TrelloClient):
         if query_params is None:
             query_params = {}
         if http_method in ("POST", "PUT", "DELETE") and not files:
-            headers['Content-Type'] = 'application/json; charset=utf-8'
+            headers["Content-Type"] = "application/json; charset=utf-8"
 
         data = None
         if post_args:
             data = json.dumps(post_args)
 
-        query_params['key'] = self.api_key
-        query_params['token'] = self.token
+        query_params["key"] = self.api_key
+        query_params["token"] = self.token
 
         url = f"https://api.trello.com/1/{uri_path}"
-        response = requests.request(http_method, url, headers=headers, params=query_params, data=data)
+        response = requests.request(
+            http_method, url, headers=headers, params=query_params, data=data
+        )
         return response.json()
 
 
@@ -72,29 +80,53 @@ class TrelloHelper:
         expected_values = [v.value for v in TicketStatus]
         for val in expected_values:
             if val not in self.list_ids:
-                print(f"Error: List {val} not found. Make sure you have the correct list names {expected_values}.")
+                print(
+                    f"Error: List {val} not found. Make sure you have the correct list names {expected_values}."
+                )
                 exit(1)
-                
+
     def get_ticket(self, ticket_id):
         card = self.client.get_card(ticket_id)
-        return Ticket(id=card.id, title=card.name, description=card.description, assignee_id=card.labels[0].id if card.labels else None)
+        return Ticket(
+            id=card.id,
+            title=card.name,
+            description=card.description,
+            assignee_id=card.labels[0].id if card.labels else None,
+        )
 
     def get_backlog_tickets(self):
-        cards = self.client.get_list(self.list_ids[TicketStatus.BACKLOG.value]).list_cards()
+        cards = self.client.get_list(
+            self.list_ids[TicketStatus.BACKLOG.value]
+        ).list_cards()
         if not cards:
             return []
-        
-        return [Ticket(id=card.id, title=card.name, description=card.description, assignee_id=card.labels[0].id if card.labels else "unassigned") for card in cards]
+
+        return [
+            Ticket(
+                id=card.id,
+                title=card.name,
+                description=card.description,
+                assignee_id=card.labels[0].id if card.labels else "unassigned",
+            )
+            for card in cards
+        ]
 
     def get_waiting_for_review_tickets(self):
-        cards = self.client.get_list(self.list_ids[TicketStatus.READY_FOR_REVIEW.value]).list_cards()
+        cards = self.client.get_list(
+            self.list_ids[TicketStatus.READY_FOR_REVIEW.value]
+        ).list_cards()
         if not cards:
             return []
-        
-        return [Ticket(id=card.id, title=card.name, description=card.description, assignee_id=card.labels[0].id if card.labels else "unassigned") for card in cards]
 
-    def get_labels(self):
-        return [label.id for label in self.client.get_board(self.client.list_boards()[0].id).get_labels()]
+        return [
+            Ticket(
+                id=card.id,
+                title=card.name,
+                description=card.description,
+                assignee_id=card.labels[0].id if card.labels else "unassigned",
+            )
+            for card in cards
+        ]
 
     def move_to_waiting_for_review(self, ticket_id):
         ticket = self.client.get_card(ticket_id)
@@ -117,11 +149,17 @@ class TrelloHelper:
         for ticket in tickets:
             assignee = choice(interns)
             print(f"Assigning {ticket.title} to {assignee}")
+            ticket.assignee_id = assignee
+            ticket.status = TicketStatus.BACKLOG
             # Create a card in the backlog
-            card = self.client.add_card(ticket.title, ticket.description, self.list_ids[TicketStatus.BACKLOG.value], assignee)
+            self.client.add_card(
+                ticket.title,
+                ticket.description,
+                self.list_ids[TicketStatus.BACKLOG.value],
+                assignee,
+            )
 
-        return [ticket.title for title in tickets]
-        
+        return [t.title for t in tickets]
+
     def get_intern_list(self):
-        return [member.username for member in self.client.get_board_members(self.list_ids[TicketStatus.BACKLOG.value])]
-
+        return [label.id for label in self.client.list_boards()[0].get_labels()]

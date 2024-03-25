@@ -2,7 +2,7 @@ from typing import Dict, List
 import dspy
 import json
 
-from models import Codebase, Ticket
+from src.models import Codebase, Ticket
 
 
 class RelevantFileSelectionSignature(dspy.Signature):

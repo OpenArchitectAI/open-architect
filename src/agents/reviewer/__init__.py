@@ -1,11 +1,10 @@
-from typing import List
-from src.agents.reviewer.generators.code_review_generator import GeneratedCodeReview
-from reviewer.processors import review_code
-
-from src.models import PR, CodeReview, ModifiedFile, Ticket
 from github.PullRequest import PullRequest
-
 import time
+from typing import List
+
+from src.agents.reviewer.generators.code_review_generator import GeneratedCodeReview
+from src.agents.reviewer.processors import review_code
+from src.models import PR, CodeReview, ModifiedFile, Ticket
 
 
 class Reviewer:

@@ -1,10 +1,10 @@
-from intern.processors import better_code_change, generate_code_change
 from random import choice
 import time
 from threading import Thread
 from typing import List
-from src.models import Ticket
 
+from src.agents.intern.processors import better_code_change, generate_code_change
+from src.models import Ticket
 from src.helpers.github import GHHelper
 from src.helpers.trello import TrelloHelper
 
@@ -44,6 +44,7 @@ class Intern:
         return len(next_tickets) == 0
 
     def refresh_pr_backlog(self):
+        return  # Not implemented yet
         print(f"[INTERN {self.name}] Looking on GitHub for reviewed PRs")
         next_prs = [
             pr
@@ -117,7 +118,7 @@ class Intern:
                 self.process_ticket()
                 number_of_attempts = 0
             else:
-                print(f"[INTERN {self.name}] No tickets or PRs to process, idling...")
+                print(f"[INTERN {self.name}] No tickets to process, idling...")
                 number_of_attempts += 1
                 if number_of_attempts == 5:
                     print(f"[INTERN {self.name}] No more work to do, bye bye!")

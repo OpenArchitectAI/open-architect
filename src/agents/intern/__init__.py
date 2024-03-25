@@ -1,14 +1,14 @@
-from intern.processors import better_code_change, generate_code_change
 from random import choice
 import time
 from threading import Thread
 from typing import List
-from src.models import Ticket
 
+from src.agents.intern.processors import better_code_change, generate_code_change
+from src.models import Ticket
 from src.helpers.github import GHHelper
 from src.helpers.trello import TrelloHelper
 
-REFRESH_EVERY = 10
+REFRESH_EVERY = 5
 PROCESS_EVERY = 5
 MAX_REFRESH_CYCLES_WITHOUT_WORK = 50000
 MAX_PROCESS_CYCLES_WITHOUT_WORK = 10000
@@ -18,15 +18,18 @@ class Intern:
     def __init__(self, name, gh_helper: GHHelper, trello_helper: TrelloHelper):
         self.name = name
         self.id = choice(trello_helper.get_intern_list())
-        self.ticket_backlog: List[Ticket] = []
+        self.ticket_todo_list: List[Ticket] = []
         self.pr_backlog = []
         self.gh_helper = gh_helper
         self.trello_helper = trello_helper
         self.fetch_thread = Thread(target=self.refresh_loop)
         self.process_thread = Thread(target=self.process_loop)
-        print(f"[INTERN {self.name}] Hey! I'm {self.name}, excited to start working!")
+        self.log_name = f"[INTERN {self.name} - Mistral-Large]"
+        print(
+            f"[{self.log_name}] Hey! I'm {self.name}, excited to start working! I'll look for tickets to code!"
+        )
 
-    def refresh_ticket_backlog(self):
+    def refresh_ticket_todo_list(self):
         # for ticket in self.trello_helper.get_backlog_tickets():
         #     print(f"Ticket ID: {ticket.id}, Title: {ticket.title}, Description: {ticket.description}, Assignee: {ticket.assignee_id}, Label: {ticket}")
         # next_tickets = [
@@ -34,16 +37,17 @@ class Intern:
         #     for t in self.trello_helper.get_backlog_tickets()
         #     if t not in self.ticket_backlog and t.assignee_id == self.id
         # ]
-        print(f"[INTERN {self.name}] Looking on Trello for new assigned tickets")
+        # print(f"[INTERN {self.name}] Looking on Trello for new assigned tickets")
         next_tickets = [
             t
-            for t in self.trello_helper.get_backlog_tickets()
-            if t not in self.ticket_backlog
+            for t in self.trello_helper.get_tickets_todo_list()
+            if t not in self.ticket_todo_list
         ]
-        self.ticket_backlog.extend(next_tickets)
+        self.ticket_todo_list.extend(next_tickets)
         return len(next_tickets) == 0
 
     def refresh_pr_backlog(self):
+        return  # Not implemented yet
         print(f"[INTERN {self.name}] Looking on GitHub for reviewed PRs")
         next_prs = [
             pr
@@ -60,14 +64,13 @@ class Intern:
         # Do some processing with LLMs, create a new code_change
         code_change = generate_code_change("", comment)
         self.gh_helper.push_changes(code_change, pr.ticket_id, pr.assignee_id)
-        print(f"[INTERN {self.name}] Moving card to waiting for review")
+        print(f"[{self.log_name}] Moving card to waiting for review")
         self.trello_helper.move_to_waiting_for_review(pr.ticket_id)
 
     def process_ticket(self):
         # Get the first ticket from the backlog
         # Process it (Trello + GH)
-
-        ticket = self.ticket_backlog.pop(0)
+        ticket = self.ticket_todo_list.pop(0)
 
         # Move ticket to WIP
         self.trello_helper.move_to_wip(ticket.id)
@@ -78,7 +81,7 @@ class Intern:
             ticket, self.gh_helper.get_entire_codebase()
         )
 
-        print(f"[INTERN {self.name}] Pushing changes to a PR")
+        print(f"[{self.log_name}] Pushing changes to a PR")
         # Push the changes to the PR
         branch_name = f"{ticket.id}_{ticket.title.lower().replace(' ', '_')}"
         self.gh_helper.push_changes(
@@ -91,15 +94,15 @@ class Intern:
         )
 
         self.trello_helper.move_to_waiting_for_review(ticket_id=ticket.id)
-        print(f"[INTERN {self.name}] PR Created")
+        print(f"[{self.log_name}] PR Created")
 
     def refresh_loop(self):
         cycles_without_work = 0
         while True:
-            if not self.refresh_pr_backlog() and not self.refresh_ticket_backlog():
+            if not self.refresh_pr_backlog() and not self.refresh_ticket_todo_list():
                 cycles_without_work += 1
                 if cycles_without_work == MAX_REFRESH_CYCLES_WITHOUT_WORK:
-                    print(f"[INTERN {self.name}] No more work to do, bye bye!")
+                    print(f"[{self.log_name}] No more work to do, bye bye!")
                     break
             else:
                 cycles_without_work = 0
@@ -113,14 +116,14 @@ class Intern:
             if self.pr_backlog:
                 self.process_pr()
                 number_of_attempts = 0
-            elif self.ticket_backlog:
+            elif self.ticket_todo_list:
                 self.process_ticket()
                 number_of_attempts = 0
             else:
-                print(f"[INTERN {self.name}] No tickets or PRs to process, idling...")
+                # print(f"[INTERN {self.name}] No tickets to process, idling...")
                 number_of_attempts += 1
-                if number_of_attempts == 5:
-                    print(f"[INTERN {self.name}] No more work to do, bye bye!")
+                if number_of_attempts == MAX_PROCESS_CYCLES_WITHOUT_WORK:
+                    print(f"[{self.log_name}] No more work to do, bye bye!")
                     break
                 time.sleep(10)
 

@@ -1,6 +1,14 @@
-# MoarSWEPls by OpenArchitect
+<h1 align="center">Open Architect</h1>
 
-Orchestrate your fleet of AI software designers, engineers and reviewers!
+<p align="center">
+<strong>Orchestrate your fleet of AI software designers, engineers and reviewers!</strong>
+
+<img width="638" alt="image" src="https://github.com/OpenArchitectAI/open-architect/assets/1381992/3eb3c6d7-ff15-4b82-b85d-d32482123fad">
+<br>
+<br>
+<span>Created at the MistralAI hackathon in SF</span>
+<br>
+</p>
 
 Just create tickets (or have an AI architect assist you), and let the agents do the work. Your approval is required to merge PRs, so no bug or wrong code is ever introduced without your approval!
 
@@ -13,28 +21,25 @@ Just create tickets (or have an AI architect assist you), and let the agents do 
 
 ### How to connect to Github
 
-1. Be part of the org of your repo, or the owner of the repo.
-2. Go to https://github.com/settings/tokens?type=beta and create a personnal access token for the repo
-3. Run `oa setup github` to provide the path to your repo (in the format *owner/repo_name*) and the access token, or put them in `.env`
-
-## How to run
-
-Run your fleet with:
-- `oa start intern` to spawn a developer that will process tickets and open PRs with code.
-- `oa start reviewer` to spawn a reviewer that will review PRs and ask for changes.
-- `oa start architect` to spawn an architect running in a chatbot that will create code tickets with you.
-
-## Connecting to the GH Client
-
 1. Be part of the org of your repo
 2. Go to https://github.com/settings/tokens?type=beta and create a personnal access token for the repo
 3. Run the init_connections.py script and provide the URL to your repo and the access token
 
-## Connecting to the Trello Client
+### Hot to connect to Trello
 
 1. Connect to https://trello.com/ and log in. Navigate to your target Board. Save the Board ID.
 2. Create a PowerUp for your Workspace at https://trello.com/power-ups/admin (you don't need the Iframe connector URL). Save your API Key and Secret
 3. Run the init_connections.py script and provide the needed secrets
+
+   
+## How to run
+
+Run your fleet with:
+- `./oa start intern` to spawn a developer that will process tickets and open PRs with code.
+- `./oa start reviewer` to spawn a reviewer that will review PRs and ask for changes.
+- `./oa start architect` (*coming very soon*) to spawn an architect running in a chatbot that will create code tickets with you.
+
+You can also start multiple ones with `./oa start agent1 agent2`
 
 ## Contributing
 

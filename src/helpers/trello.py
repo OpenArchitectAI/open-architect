@@ -85,10 +85,15 @@ class TrelloHelper:
                     f"Error: List {val} not found. Make sure you have the correct list names {expected_values}."
                 )
                 exit(1)
-                
+
     def get_ticket(self, ticket_id):
         card = self.client.get_card(ticket_id)
-        return Ticket(id=card.id, title=card.name, description=card.description, assignee_id=card.labels[0].id if card.labels else None)
+        return Ticket(
+            id=card.id,
+            title=card.name,
+            description=card.description,
+            assignee_id=card.labels[0].id if card.labels else None,
+        )
 
     def get_ticket(self, ticket_id):
         card = self.client.get_card(ticket_id)

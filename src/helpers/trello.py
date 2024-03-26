@@ -71,8 +71,8 @@ class TrelloHelper:
             api_key=trello_api_key,
             token=trello_token,
         )
-        self.board_id = trello_board_id
-        print("TrelloHelper initialized")
+
+        # print("TrelloHelper initialized")
 
         board = self.client.get_board(trello_board_id)
         # print(f"Selected board: {board.name}")

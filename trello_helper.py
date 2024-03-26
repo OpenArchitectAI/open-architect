@@ -115,10 +115,12 @@ class TrelloHelper:
         for ticket in tickets:
             assignee = choice(interns)
             print(f"Assigning {ticket.title} to {assignee}")
+            ticket.assignee_id = assignee
+            ticket.status = TicketStatus.BACKLOG
             # Create a card in the backlog
-            card = self.client.add_card(ticket.title, ticket.description, self.list_ids[TicketStatus.BACKLOG.value], assignee)
+            self.client.add_card(ticket.title, ticket.description, self.list_ids[TicketStatus.BACKLOG.value], assignee)
 
-        return [ticket.title for title in tickets]
+        return [t.title for t in tickets]
         
     def get_intern_list(self):
         board = self.client.get_board(self.board_id)

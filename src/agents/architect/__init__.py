@@ -12,8 +12,6 @@ from src.models import Ticket
 from dotenv import load_dotenv
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-
-
 class ArchitectAgentRequest(BaseModel):
     question: str
     history: Any
@@ -24,9 +22,20 @@ class CreateTicketsRequest(BaseModel):
     question: str
     history: Any
     trello_client: Any
-
 class CreateSubtasksRequest(BaseModel):
     question: str
+    history: Any
+
+class IngestCodebaseRequest(BaseModel):
+    codebaseName: str 
+    githubAccessToken: str 
+
+class ReferenceExistingCodeRequest(BaseModel):
+    question: str
+    codebaseName: str
+
+class AskFollowupQuestionsRequest(BaseModel):
+    question: str 
     history: Any
 
 class IngestCodebaseRequest(BaseModel):
@@ -83,6 +92,14 @@ def architect_agent(architectAgentRequest: ArchitectAgentRequest):
             {
                 "type": "function",
                 "function": {
+                    "name": "ask_followup_questions",
+                    "description": "Ask additional questions to better understand what the user wants to build. This will help you to better understand the project requirements and break the task down into smaller tickets.  You should ask questions to clarify the project requirements and get a detailed description of the project.  You should not create tickets until you have a clear understanding of the project requirements.  Once you have all the details of the project, you can then break down the task into smaller tickets and create those tickets.  After you have all the subtasks, proceed to creating the tasks.  You should ask the user if they are good to create the tasks and then create the tasks for the user.",
+                    "parameters": {"type": "object", "properties": {}, "required": []},
+                },
+            },
+            {
+                "type": "function",
+                "function": {
                     "name": "create_subtasks",
                     "description": "Based on the user's initial descriptions of the task, break the task down into detailed subtasks to accomplish the larger task. Each subtask should include a title and a detailed description of the subtask.",
                     "parameters": {"type": "object", "properties": {}, "required": []},
@@ -103,7 +120,6 @@ def architect_agent(architectAgentRequest: ArchitectAgentRequest):
                     "description": "If the user asks to implement in their codebase. Go through the existing code in order to better understand how to build the requested user feature in the codebase. Analyze the code files, and determine the best way to build out support for the new features in the existing code. ",
                     "parameters": {"type": "object", "properties": {}, "required": []},
                 }
-
             },
         ]
 
@@ -155,7 +171,6 @@ def architect_agent(architectAgentRequest: ArchitectAgentRequest):
         else:
             print("returning message: " + str(response_message.content))
             return response_message.content
-        
     return run_conversation()
 
 
@@ -185,7 +200,6 @@ def ask_followup_questions(askFollowupQuestionsRequest: AskFollowupQuestionsRequ
     except Exception as e:
         print("Failed to generate subtasks with error " + str(e))
         return "Failed to generate subtasks with error " + str(e)
-
 
 
 def reference_existing_code(referenceExistingCodeRequest: ReferenceExistingCodeRequest):
@@ -251,7 +265,7 @@ def create_tasks(createTicketsRequest: CreateTicketsRequest):
                 }},
             ]
         }}
-        
+       
         Take each subtask and generate a title and description.  Each one should correspond with a list element in the subtask list. You need to cover all of the subtasks that are mentioned and create a ticket for each one. Each ticket should include the title and description of the subtask. The response should be a list of these json objects for each subtask.
         """
 

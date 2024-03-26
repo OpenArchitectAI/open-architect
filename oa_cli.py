@@ -9,14 +9,14 @@ from src.agents.reviewer import Reviewer
 
 
 def start_intern(gh_helper_intern, trello_helper):
-    intern = Intern("alex", gh_helper=gh_helper_intern, trello_helper=trello_helper)
+    intern = Intern("Alex", gh_helper=gh_helper_intern, trello_helper=trello_helper)
     intern_thread = Thread(target=intern.run)
     intern_thread.start()
 
 
 def start_reviewer(gh_helper_reviewer, trello_helper):
     reviewer = Reviewer(
-        "charlie", gh_helper=gh_helper_reviewer, trello_helper=trello_helper
+        "Charlie", gh_helper=gh_helper_reviewer, trello_helper=trello_helper
     )
     reviewer_thread = Thread(target=reviewer.run)
     reviewer_thread.start()
@@ -25,7 +25,9 @@ def start_reviewer(gh_helper_reviewer, trello_helper):
 def main():
     parser = argparse.ArgumentParser(description="Open Architect CLI")
     parser.add_argument("command", choices=["run"], help="Command to execute")
-    parser.add_argument("agent", choices=["intern", "reviewer"], help="Agent to run")
+    parser.add_argument(
+        "agents", nargs="+", choices=["intern", "reviewer"], help="Agents to run"
+    )
     args = parser.parse_args()
 
     load_dotenv()
@@ -59,10 +61,11 @@ def main():
     trello_helper = TrelloHelper(trello_api_key, trello_token, trello_board_id)
 
     if args.command == "run":
-        if args.agent == "intern":
-            start_intern(gh_helper_intern, trello_helper)
-        elif args.agent == "reviewer":
-            start_reviewer(gh_helper_reviewer, trello_helper)
+        for agent in args.agents:
+            if agent == "intern":
+                start_intern(gh_helper_intern, trello_helper)
+            elif agent == "reviewer":
+                start_reviewer(gh_helper_reviewer, trello_helper)
 
 
 if __name__ == "__main__":

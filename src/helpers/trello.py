@@ -71,11 +71,8 @@ class TrelloHelper:
             token=trello_token,
         )
 
-        # print("TrelloHelper initialized")
-
         board = self.client.get_board(trello_board_id)
-        # print(f"Selected board: {board.name}")
-        # print(f"Board lists: {board.list_lists()}")
+        self.board_id = trello_board_id
         self.list_ids = {list.name: list.id for list in board.list_lists()}
         expected_values = [v.value for v in TicketStatus]
         for val in expected_values:
@@ -162,4 +159,5 @@ class TrelloHelper:
         return [t.title for t in tickets]
 
     def get_intern_list(self):
-        return [label.id for label in self.client.list_boards()[0].get_labels()]
+        board = self.client.get_board(self.board_id)
+        return [member.username for member in board.all_members()]

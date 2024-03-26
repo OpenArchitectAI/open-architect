@@ -35,3 +35,10 @@ Run your fleet with:
 1. Connect to https://trello.com/ and log in. Navigate to your target Board. Save the Board ID.
 2. Create a PowerUp for your Workspace at https://trello.com/power-ups/admin (you don't need the Iframe connector URL). Save your API Key and Secret
 3. Run the init_connections.py script and provide the needed secrets
+
+## Contributing
+
+This is intended to be a collaborative project, and we'd love to take suggestions for new features, improvements, and fixes!
+
+- If there is something you'd like us to work on, feel free to open an **Issue** with the adequate tag and a good description. If it's a bug, please add steps to reproduce it.
+- If you have a contribution you'd like to make: first of all, thanks! You rock! Please open a PR and we'll review it as soon as we can!

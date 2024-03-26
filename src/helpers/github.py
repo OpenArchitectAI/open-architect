@@ -67,6 +67,7 @@ class GHHelper:
                         ticket_id=ticket_id,
                         files_changed=files_changed_with_diffs,
                         raw_pr=pr,
+                        url=pr.html_url,
                     )
                 )
         return open_prs

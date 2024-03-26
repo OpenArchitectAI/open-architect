@@ -31,6 +31,7 @@ class PR(BaseModel):
     title: str
     description: str
     files_changed: List[ModifiedFile] = []
+    url: Optional[str] = None
 
 
 class CodeReview(BaseModel):

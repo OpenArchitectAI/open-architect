@@ -22,8 +22,6 @@ def review_code(codebase: Codebase, ticket: Ticket, pr: PR) -> GeneratedCodeRevi
     # This function is responsible for reviewing the code
     # It should take each of the PR comments, the associated code chunks
     # It should update comment on the PR and either approve or request changes
-    print("Reviewing code...")
-
     dspy.configure(lm=gpt4)
 
     reviewer_agent = ReviewerAgent()

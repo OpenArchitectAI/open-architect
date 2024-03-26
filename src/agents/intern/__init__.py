@@ -3,6 +3,7 @@ import time
 from threading import Thread
 from typing import List
 
+from src.lib.terminal import colorize
 from src.agents.intern.processors import better_code_change, generate_code_change
 from src.models import Ticket
 from src.helpers.github import GHHelper
@@ -24,9 +25,9 @@ class Intern:
         self.trello_helper = trello_helper
         self.fetch_thread = Thread(target=self.refresh_loop)
         self.process_thread = Thread(target=self.process_loop)
-        self.log_name = f"[INTERN {self.name} - Mistral-Large]"
+        self.log_name = colorize(f"[{self.name} the intern]", bold=True, color="red")
         print(
-            f"[{self.log_name}] Hey! I'm {self.name}, excited to start working! I'll look for tickets to code!"
+            f"{self.log_name} Hey! I'm {self.name} the software dev intern 😁, excited to start working! I'll look for tickets to code!"
         )
 
     def refresh_ticket_todo_list(self):
@@ -72,6 +73,8 @@ class Intern:
         # Process it (Trello + GH)
         ticket = self.ticket_todo_list.pop(0)
 
+        print(f'{self.log_name} Starting to work on ticket "{ticket.title:.30}..."')
+
         # Move ticket to WIP
         self.trello_helper.move_to_wip(ticket.id)
 
@@ -81,7 +84,7 @@ class Intern:
             ticket, self.gh_helper.get_entire_codebase()
         )
 
-        print(f"[{self.log_name}] Pushing changes to a PR")
+        print(f"{self.log_name} Finished coding! Pushing changes to a PR...")
         # Push the changes to the PR
         branch_name = f"{ticket.id}_{ticket.title.lower().replace(' ', '_')}"
         self.gh_helper.push_changes(
@@ -94,7 +97,7 @@ class Intern:
         )
 
         self.trello_helper.move_to_waiting_for_review(ticket_id=ticket.id)
-        print(f"[{self.log_name}] PR Created")
+        print(f"{self.log_name} PR Created! Feel free to review it!")
 
     def refresh_loop(self):
         cycles_without_work = 0
@@ -102,7 +105,7 @@ class Intern:
             if not self.refresh_pr_backlog() and not self.refresh_ticket_todo_list():
                 cycles_without_work += 1
                 if cycles_without_work == MAX_REFRESH_CYCLES_WITHOUT_WORK:
-                    print(f"[{self.log_name}] No more work to do, bye bye!")
+                    print(f"{self.log_name} No more work to do, bye bye!")
                     break
             else:
                 cycles_without_work = 0
@@ -123,7 +126,7 @@ class Intern:
                 # print(f"[INTERN {self.name}] No tickets to process, idling...")
                 number_of_attempts += 1
                 if number_of_attempts == MAX_PROCESS_CYCLES_WITHOUT_WORK:
-                    print(f"[{self.log_name}] No more work to do, bye bye!")
+                    print(f"{self.log_name} No more work to do, bye bye!")
                     break
                 time.sleep(10)
 

@@ -57,12 +57,13 @@ class CustomTrelloClient(TrelloClient):
 
 
 class TrelloHelper:
+
     def __init__(self, trello_api_key, trello_token, trello_board_id):
         self.client = CustomTrelloClient(
             api_key=trello_api_key,
             token=trello_token,
         )
-
+        self.board_id = trello_board_id
         print("TrelloHelper initialized")
 
         board = self.client.get_board(trello_board_id)
@@ -119,5 +120,6 @@ class TrelloHelper:
         return [ticket.title for title in tickets]
         
     def get_intern_list(self):
-        return [member.username for member in self.client.get_board_members(self.list_ids[TicketStatus.BACKLOG.value])]
+        board = self.client.get_board(self.board_id)
+        return [member.username for member in board.all_members()]
 

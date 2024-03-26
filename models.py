@@ -11,7 +11,7 @@ class Ticket(BaseModel):
     title: str
     description: str
     status: Optional[str] = None
-    assignee_id: str
+    assignee_id: Optional[str] = None
 
 
 class ModifiedFile(BaseModel):

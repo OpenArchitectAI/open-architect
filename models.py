@@ -26,18 +26,18 @@ class ModifiedFile(BaseModel):
 # Todo: Use github.PullRequest class instead of this
 class PR(BaseModel):
     id: int
-    ticket_id: int
-    assignee_id: int
+    ticket_id: Optional[str] = None
+    assignee_id: Optional[str] = None
     title: str
     description: str
-    files_changed: List[ModifiedFile]
+    files_changed: List[ModifiedFile] = []
 
 
 class CodeReview(BaseModel):
     pr: PR
     body: str
     event: Literal["APPROVE", "REQUEST_CHANGES", "COMMENT"]
-    comments: List[ReviewComment]
+    comments: List[ReviewComment] = []
 
 
 class Codebase(BaseModel):

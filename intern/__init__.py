@@ -1,3 +1,4 @@
+from gh_helper import add_ticket_info_to_pr_body
 from intern.processors import better_code_change, generate_code_change
 from random import choice
 import time
@@ -19,6 +20,13 @@ class Intern:
         print(f"Hey! I'm {self.name}, excited to start working!")
 
     def refresh_ticket_backlog(self):
+        # for ticket in self.trello_helper.get_backlog_tickets():
+        #     print(f"Ticket ID: {ticket.id}, Title: {ticket.title}, Description: {ticket.description}, Assignee: {ticket.assignee_id}, Label: {ticket}")
+        # next_tickets = [
+        #     t
+        #     for t in self.trello_helper.get_backlog_tickets()
+        #     if t not in self.ticket_backlog and t.assignee_id == self.id
+        # ]
         next_tickets = [
             t
             for t in self.trello_helper.get_backlog_tickets()
@@ -41,6 +49,7 @@ class Intern:
         # Do some processing with LLMs, create a new code_change
         code_change = generate_code_change("", comment)
         self.gh_helper.push_changes(code_change, pr.ticket_id, pr.assignee_id)
+        print("Moving card to waiting for review") 
         self.trello_helper.move_to_waiting_for_review(pr.ticket_id)
         pass
 
@@ -87,4 +96,4 @@ class Intern:
             else:
                 self.refresh_ticket_backlog()
                 self.refresh_pr_backlog()
-                time.sleep(30)
+                time.sleep(10)

@@ -62,9 +62,9 @@ intern_thread = Thread(target=intern.run)
 reviewer_thread = Thread(target=reviewer.run)
 
 # Step 1: With User input (streamit), define tickets, push to Trello's Backlog
-# chat_interface.open_architect(trello_helper, gh_helper_reviewer)
+chat_interface.open_architect(trello_helper, gh_helper_reviewer)
 
-while True:
+# while True:
     # Step 2: Let's get to work (n + 1 threads)
-    intern_thread.start()
-    reviewer_thread.start()
+    # intern_thread.start()
+    # reviewer_thread.start()

@@ -8,7 +8,7 @@ class ArchitectAgentRequest(BaseModel):
     question: str
     history: typing.Any
     trello_client: typing.Any
-
+    github_client: typing.Any
 
 # Function to send message and get response
 def send_message(architectureAgentReq: ArchitectAgentRequest):
@@ -16,6 +16,7 @@ def send_message(architectureAgentReq: ArchitectAgentRequest):
         question=architectureAgentReq.question,
         history=architectureAgentReq.history,
         trello_client=architectureAgentReq.trello_client,
+        github_client=architectureAgentReq.github_client,
     )
     response = architect.architect_agent(architectureAgentReq)
     return response
@@ -27,6 +28,7 @@ def open_architect(trello_client, github_client):
 
     if "messages" not in st.session_state:
         st.session_state.messages = []
+        st.session_state.messages.append({"role": "assistant", "content": "Hey! What new features would you like to add to your project " + str(github_client.repo.full_name) + " today?  I'll help you break it down to subtasks, figure out how to integrate with your existing code and then set my crew of SWE agents to get it built out for you!"})
 
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
@@ -43,9 +45,9 @@ def open_architect(trello_client, github_client):
                 history=[
                     msg["content"]
                     for msg in st.session_state.messages
-                    if msg["role"] == "user"
                 ],
                 trello_client=trello_client,
+                github_client=github_client,
             )
             response = send_message(architectAgentRequest)
             res = st.write(response)

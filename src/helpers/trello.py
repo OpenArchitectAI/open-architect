@@ -71,11 +71,8 @@ class TrelloHelper:
             token=trello_token,
         )
 
-        # print("TrelloHelper initialized")
-
         board = self.client.get_board(trello_board_id)
-        # print(f"Selected board: {board.name}")
-        # print(f"Board lists: {board.list_lists()}")
+        self.board_id = trello_board_id
         self.list_ids = {list.name: list.id for list in board.list_lists()}
         expected_values = [v.value for v in TicketStatus]
         for val in expected_values:
@@ -146,6 +143,7 @@ class TrelloHelper:
 
     def push_tickets_to_backlog_and_assign(self, tickets: List[Ticket]):
         interns = self.get_intern_list()
+        ticket_list = []
         for ticket in tickets:
             assignee = choice(interns)
             print(f"Assigning {ticket.title} to {assignee}")
@@ -158,8 +156,10 @@ class TrelloHelper:
                 self.list_ids[TicketStatus.BACKLOG.value],
                 assignee,
             )
+            ticket_list.append([ticket.title, assignee, ticket.description])
 
-        return [t.title for t in tickets]
+        return ticket_list
 
     def get_intern_list(self):
-        return [label.id for label in self.client.list_boards()[0].get_labels()]
+        board = self.client.get_board(self.board_id)
+        return [member.username for member in board.all_members()]

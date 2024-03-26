@@ -29,10 +29,10 @@ class GHHelper:
     def __init__(self, gh_api_token, gh_repo):
         auth = Auth.Token(gh_api_token)
         self.gh = Github(auth=auth)
-        # print("GHHelper initialized")
+
         try:
             self.repo = self.gh.get_repo(gh_repo)
-            # print(f"Selected repo: {self.repo.name}")
+            print(f"Selected repo: {self.repo.name}")
         except Exception as e:
             print(f"Error: {e}")
 

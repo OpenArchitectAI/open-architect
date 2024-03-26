@@ -143,6 +143,7 @@ class TrelloHelper:
 
     def push_tickets_to_backlog_and_assign(self, tickets: List[Ticket]):
         interns = self.get_intern_list()
+        ticket_list = []
         for ticket in tickets:
             assignee = choice(interns)
             print(f"Assigning {ticket.title} to {assignee}")
@@ -155,8 +156,9 @@ class TrelloHelper:
                 self.list_ids[TicketStatus.BACKLOG.value],
                 assignee,
             )
+            ticket_list.append([ticket.title, assignee, ticket.description])
 
-        return [t.title for t in tickets]
+        return ticket_list
 
     def get_intern_list(self):
         board = self.client.get_board(self.board_id)

@@ -1,6 +1,5 @@
 import streamlit as st
-import requests
-from architect import main as architect
+from src.agents import architect
 from pydantic import BaseModel
 import typing
 
@@ -45,9 +44,7 @@ def open_architect(trello_client, github_client):
                 history=[msg["content"] for msg in st.session_state.messages],
                 trello_client=trello_client,
             )
-            response = send_message(
-                architectAgentRequest
-            )
+            response = send_message(architectAgentRequest)
             res = st.write(response)
 
         st.session_state.messages.append({"role": "assistant", "content": response})

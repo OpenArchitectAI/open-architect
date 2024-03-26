@@ -1,7 +1,7 @@
 from typing import List
 import dspy
 
-from models import Codebase, Ticket, PR, CodeReview
+from src.models import Codebase, Ticket, PR, CodeReview
 
 
 class GeneratedCodeReview:

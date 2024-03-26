@@ -1,8 +1,8 @@
 from dotenv import load_dotenv
 import os
 
-from models import Ticket
-from trello_helper import TrelloHelper
+from src.models import Ticket
+from src.helpers.trello import TrelloHelper
 
 load_dotenv()
 
@@ -26,7 +26,7 @@ if tickets:
     new_ticket = Ticket(
         title="Test Ticket",
         description="This is a test ticket",
-        assignee_id=trello_helper.get_intern_list()[-1]
+        assignee_id=trello_helper.get_intern_list()[-1],
     )
 
     trello_helper.push_tickets_to_backlog_and_assign([new_ticket])

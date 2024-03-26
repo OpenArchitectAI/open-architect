@@ -2,10 +2,10 @@ import argparse
 from dotenv import load_dotenv
 from threading import Thread
 import os
-from gh_helper import GHHelper
-from trello_helper import TrelloHelper
-from intern import Intern
-from reviewer import Reviewer
+from src.helpers.github import GHHelper
+from src.helpers.trello import TrelloHelper
+from src.agents.intern import Intern
+from src.agents.reviewer import Reviewer
 
 
 def start_intern(gh_helper_intern, trello_helper):

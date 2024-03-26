@@ -1,8 +1,8 @@
-from intern.agents.diff_generator import DiffGenerator
-from language_models import gpt4, mistral
+from src.agents.intern.generators.diff_generator import DiffGenerator
+from src.language_models import gpt4, mistral
 import dspy
 
-from models import Codebase, Ticket
+from src.models import Codebase, Ticket
 
 
 def better_code_change(previous_code_change, pr, comments):

@@ -40,7 +40,11 @@ def open_architect(trello_client, github_client):
         with st.chat_message("assistant"):
             architectAgentRequest = ArchitectAgentRequest(
                 question=prompt,
-                history=[msg["content"] for msg in st.session_state.messages],
+                history=[
+                    msg["content"]
+                    for msg in st.session_state.messages
+                    if msg["role"] == "user"
+                ],
                 trello_client=trello_client,
             )
             response = send_message(architectAgentRequest)

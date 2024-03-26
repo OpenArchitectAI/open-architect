@@ -2,27 +2,31 @@ from github.PullRequest import PullRequest
 import time
 from typing import List
 
+from src.lib.terminal import colorize
 from src.agents.reviewer.generators.code_review_generator import GeneratedCodeReview
 from src.agents.reviewer.processors import review_code
 from src.models import PR, CodeReview, ModifiedFile, Ticket
+from src.helpers.trello import TrelloHelper
+from src.helpers.github import GHHelper
 
 
 class Reviewer:
     def __init__(self, name, gh_helper, trello_helper):
         self.name = name
         self.pr_backlog = []
-        self.gh_helper = gh_helper
-        self.trello_helper = trello_helper
+        self.gh_helper: GHHelper = gh_helper
+        self.trello_helper: TrelloHelper = trello_helper
+        self.log_name = colorize(f"[{self.name} the reviewer]", bold=True, color="cyan")
         print(
-            f"[REVIEWER] Hi, my name is {self.name}. I'm ready to review some bad code."
+            f"{self.log_name} Hi, my name is {self.name} and I'm an experienced code reviewer. I'm ready to review some bad code 🧐."
         )
 
     def refresh_pr_backlog(self):
-        print("[REVIEWER] ---refresh_pr_backlog---")
+        # print("[REVIEWER] ---refresh_pr_backlog---")
         next_prs = [
             pr for pr in self.gh_helper.list_open_prs() if pr not in self.pr_backlog
         ]
-        print(f"[REVIEWER] next_prs: {[pr.title for pr in next_prs]}")
+        # print(f"[REVIEWER] next_prs: {[pr.title for pr in next_prs]}")
         self.pr_backlog.extend(next_prs)
 
     # def simplify_pr(self, raw_pr: PullRequest, ticket: Ticket) -> PR:
@@ -53,15 +57,15 @@ class Reviewer:
     #     return pr
 
     def submit_code_review(self, generated_code_review: GeneratedCodeReview):
-        print(generated_code_review.code_review)
+        # print(generated_code_review.code_review)
         for comment in generated_code_review.code_review.comments:
-            print("[REVIEWER] " + comment)
+            # print("[REVIEWER] " + comment)
             if not "position" in comment:
                 comment["position"] = 0
 
-        print("[REVIEWER] Submitting code review...")
+        # print("[REVIEWER] Submitting code review...")
         self.gh_helper.submit_code_review(generated_code_review.code_review)
-        print("[REVIEWER] Code review submitted!")
+        # print("[REVIEWER] Code review submitted!")
 
         trello_ticket_id = generated_code_review.code_review.pr.ticket_id
         if (
@@ -73,7 +77,7 @@ class Reviewer:
             self.trello_helper.move_to_reviewed(ticket_id=trello_ticket_id)
 
     def proccess_pr(self):
-        print("[REVIEWER] ---process_pr---")
+        # print("[REVIEWER] ---process_pr---")
 
         codebase = self.gh_helper.get_entire_codebase()
 
@@ -96,8 +100,14 @@ class Reviewer:
 
         # pr = self.simplify_pr(raw_pr=pr.raw_pr, ticket=ticket)
 
+        print(
+            f'{self.log_name} I am reviewing the PR for this ticket: "{ticket.title:.30}..."'
+        )
         generated_code_review = review_code(codebase=codebase, ticket=ticket, pr=pr)
         self.submit_code_review(generated_code_review=generated_code_review)
+        print(
+            f"{self.log_name} Finished reviewing the PR! Check it out on Github: {pr.url}"
+        )
 
     def run(self):
         while True:

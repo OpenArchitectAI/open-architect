@@ -20,7 +20,7 @@ def generate_code_change(ticket: Ticket, code_base: Codebase):
     # This function will be called from Intern.process_ticket
     # It will take the ticket and the code_base
     # and will return a new code_change
-    dspy.configure(lm=mistral)
+    dspy.configure(lm=gpt4)
 
     diff_generator = DiffGenerator()
 

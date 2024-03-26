@@ -1,4 +1,3 @@
-
 from dotenv import load_dotenv
 from threading import Thread
 import os

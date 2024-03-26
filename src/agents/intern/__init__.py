@@ -45,10 +45,10 @@ class Intern:
             if t not in self.ticket_todo_list
         ]
         self.ticket_todo_list.extend(next_tickets)
-        return len(next_tickets) == 0
+        return len(next_tickets) != 0
 
     def refresh_pr_backlog(self):
-        return  # Not implemented yet
+        return False # Not implemented yet
         print(f"[INTERN {self.name}] Looking on GitHub for reviewed PRs")
         next_prs = [
             pr
@@ -56,7 +56,7 @@ class Intern:
             if pr not in self.pr_backlog and pr.assignee_id == self.id
         ]
         self.pr_backlog.extend(next_prs)
-        return len(next_prs) == 0
+        return len(next_prs) != 0
 
     def process_pr(self):
         pr = self.pr_backlog.pop(0)
@@ -116,10 +116,10 @@ class Intern:
     def process_loop(self):
         number_of_attempts = 0
         while True:
-            if self.pr_backlog:
+            if len(self.pr_backlog) > 0:
                 self.process_pr()
                 number_of_attempts = 0
-            elif self.ticket_todo_list:
+            elif len(self.ticket_todo_list) > 0:
                 self.process_ticket()
                 number_of_attempts = 0
             else:

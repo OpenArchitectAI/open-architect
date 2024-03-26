@@ -228,6 +228,7 @@ def create_tasks(createTicketsRequest: CreateTicketsRequest):
                 },
                 {"role": "user", "content": questionPrompt},
             ],
+
             response_format={ "type": "json_object" }
         )
 

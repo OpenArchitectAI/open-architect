@@ -1,4 +1,3 @@
-
 from random import choice
 import time
 from threading import Thread

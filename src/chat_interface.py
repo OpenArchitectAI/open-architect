@@ -17,7 +17,6 @@ def send_message(architectureAgentReq: ArchitectAgentRequest):
         history=architectureAgentReq.history,
         trello_client=architectureAgentReq.trello_client,
     )
-    print("History in send_message: " + str(architectureAgentReq.history))
     response = architect.architect_agent(architectureAgentReq)
     return response
 
@@ -48,5 +47,3 @@ def open_architect(trello_client, github_client):
             res = st.write(response)
 
         st.session_state.messages.append({"role": "assistant", "content": response})
-
-        print("Session state is: " + str(st.session_state.messages))

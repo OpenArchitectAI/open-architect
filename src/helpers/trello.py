@@ -65,7 +65,6 @@ class CustomTrelloClient(TrelloClient):
 
 
 class TrelloHelper:
-
     def __init__(self, trello_api_key, trello_token, trello_board_id):
         self.client = CustomTrelloClient(
             api_key=trello_api_key,

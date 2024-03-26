@@ -94,6 +94,24 @@ class TrelloHelper:
             assignee_id=card.labels[0].id if card.labels else None,
         )
 
+    def get_ticket(self, ticket_id):
+        card = self.client.get_card(ticket_id)
+        return Ticket(
+            id=card.id,
+            title=card.name,
+            description=card.description,
+            assignee_id=card.labels[0].id if card.labels else None,
+        )
+
+    def get_ticket(self, ticket_id):
+        card = self.client.get_card(ticket_id)
+        return Ticket(
+            id=card.id,
+            title=card.name,
+            description=card.description,
+            assignee_id=card.labels[0].id if card.labels else None,
+        )
+
     def get_tickets_todo_list(self):
         cards = self.client.get_list(
             self.list_ids[TicketStatus.TODO.value]
@@ -162,4 +180,6 @@ class TrelloHelper:
         return [t.title for t in tickets]
 
     def get_intern_list(self):
-        return [label.id for label in self.client.list_boards()[0].get_labels()]
+        board = self.client.get_board(self.board_id)
+        return [member.username for member in board.all_members()]
+

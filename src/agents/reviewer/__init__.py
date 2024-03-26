@@ -115,3 +115,4 @@ class Reviewer:
             if len(self.pr_backlog) > 0:
                 self.proccess_pr()
             time.sleep(10)
+

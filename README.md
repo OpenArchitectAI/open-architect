@@ -9,7 +9,7 @@ Just create tickets (or have an AI architect assist you), and let the agents do 
 1. Clone this repo
 2. Install dependencies with `pip install -r requirements.txt`
 3. Enter the infos related to the repository in which you want to work in `settings.json` or run `oa setup`
-3. Profit
+4. Profit
 
 ### How to connect to Github
 

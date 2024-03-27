@@ -5,6 +5,7 @@ import os
 from src.helpers.github import GHHelper
 from src.helpers.trello import TrelloHelper
 
+from src.agents.architect import Architect
 from src.agents.intern import Intern
 from src.agents.reviewer import Reviewer
 
@@ -51,20 +52,26 @@ gh_helper_intern = GHHelper(gh_api_token_intern, gh_repo)
 gh_helper_reviewer = GHHelper(gh_api_token_reviewer, gh_repo)
 trello_helper = TrelloHelper(trello_api_key, trello_token, trello_board_id)
 
-intern = Intern("alex", gh_helper=gh_helper_intern, trello_helper=trello_helper)
-reviewer = Reviewer(
-    "charlie",
+# intern = Intern("alex", gh_helper=gh_helper_intern, trello_helper=trello_helper)
+# reviewer = Reviewer(
+#     "charlie",
+#     gh_helper=gh_helper_reviewer,
+#     trello_helper=trello_helper,
+# )
+
+architect = Architect(
+    "sophia",
     gh_helper=gh_helper_reviewer,
     trello_helper=trello_helper,
 )
 
-intern_thread = Thread(target=intern.run)
-reviewer_thread = Thread(target=reviewer.run)
+# intern_thread = Thread(target=intern.run)
+# reviewer_thread = Thread(target=reviewer.run)
 
 # Step 1: With User input (streamit), define tickets, push to Trello's Backlog
-chat_interface.open_architect(trello_helper, gh_helper_reviewer)
+chat_interface.open_architect(architect)
 
 # while True:
-    # Step 2: Let's get to work (n + 1 threads)
-    # intern_thread.start()
-    # reviewer_thread.start()
+#     # Step 2: Let's get to work (n + 1 threads)
+#     intern_thread.start()
+#     reviewer_thread.start()

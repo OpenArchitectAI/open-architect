@@ -31,7 +31,8 @@ class CustomTrelloClient(TrelloClient):
             "idList": list_id,
             "idLabels": [label_id],
         }
-        requests.post(url, headers=HEADERS, params=query_params)
+        res = requests.post(url, headers=HEADERS, params=query_params)
+        # print("Response from adding card to trello board: " + str(res.json()))
 
     def fetch_json(
         self,
@@ -150,6 +151,7 @@ class TrelloHelper:
             print(f"Assigning {ticket.title} to {assignee}")
             ticket.assignee_id = assignee
             ticket.status = TicketStatus.BACKLOG
+            print(f"Adding card to list {self.list_ids[TicketStatus.BACKLOG.value]}")
             # Create a card in the backlog
             self.client.add_card(
                 ticket.title,

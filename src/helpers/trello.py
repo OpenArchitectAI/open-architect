@@ -13,6 +13,7 @@ HEADERS = {
     "Content-Type": "application/json",
 }
 
+COLORS = ["green", "yellow", "orange", "red", "purple", "blue", "sky", "lime", "pink", "black"]
 
 class CustomTrelloClient(TrelloClient):
     # Patch, because the base one is not working
@@ -82,7 +83,7 @@ class TrelloHelper:
                 )
                 exit(1)
 
-    def get_ticket(self, ticket_id):
+    def get_ticket(self, ticket_id) -> Ticket:
         card = self.client.get_card(ticket_id)
         return Ticket(
             id=card.id,
@@ -91,7 +92,7 @@ class TrelloHelper:
             assignee_id=card.labels[0].id if card.labels else None,
         )
 
-    def get_tickets_todo_list(self):
+    def get_tickets_todo_list(self) -> List[Ticket]:
         cards = self.client.get_list(
             self.list_ids[TicketStatus.TODO.value]
         ).list_cards()
@@ -108,7 +109,7 @@ class TrelloHelper:
             for card in cards
         ]
 
-    def get_waiting_for_review_tickets(self):
+    def get_waiting_for_review_tickets(self) -> List[Ticket]:
         cards = self.client.get_list(
             self.list_ids[TicketStatus.READY_FOR_REVIEW.value]
         ).list_cards()
@@ -141,7 +142,7 @@ class TrelloHelper:
         ticket = self.client.get_card(ticket_id)
         ticket.change_list(self.list_ids[TicketStatus.WIP.value])
 
-    def push_tickets_to_backlog_and_assign(self, tickets: List[Ticket]):
+    def push_tickets_to_backlog_and_assign(self, tickets: List[Ticket]) -> List[Ticket]:
         interns = self.get_intern_list()
         ticket_list = []
         for ticket in tickets:
@@ -156,10 +157,28 @@ class TrelloHelper:
                 self.list_ids[TicketStatus.BACKLOG.value],
                 assignee,
             )
-            ticket_list.append([ticket.title, assignee, ticket.description])
+            ticket_list.append(ticket)
 
         return ticket_list
 
     def get_intern_list(self):
-        board = self.client.get_board(self.board_id)
-        return [member.username for member in board.all_members()]
+        return [label.id for label in self.client.get_board(self.board_id).get_labels()]
+
+    def create_intern(self, name):
+        label = self.client.get_board(self.board_id).add_label(name, color=choice(COLORS))
+        return label.id
+
+    # TESTING METHODS
+
+    def move_to_todo(self, ticket_id):
+        ticket = self.client.get_card(ticket_id)
+        ticket.change_list(self.list_ids[TicketStatus.TODO.value])
+
+    def get_last_ticket(self):
+        return self.client.get_list(self.list_ids[TicketStatus.BACKLOG.value]).list_cards()[-1]
+
+    def delete_ticket(self, ticket_id):
+        self.client.get_board(self.board_id).get_card(ticket_id).delete()
+
+    def fire_intern(self, intern_id):
+        self.client.get_board(self.board_id).delete_label(intern_id)

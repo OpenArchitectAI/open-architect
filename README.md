@@ -1,3 +1,5 @@
+[![](https://dcbadge.vercel.app/api/server/WCNEFsrtjw)](https://discord.gg/WCNEFsrtjw)
+
 <h1 align="center">Open Architect</h1>
 
 <p align="center">

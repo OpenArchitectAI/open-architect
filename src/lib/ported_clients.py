@@ -204,10 +204,9 @@ class MistralClient(ClientBase):
         method: str,
         json: Dict[str, Any],
         path: str,
-        stream: bool = False,
         attempt: int = 1,
     ) -> Iterator[Dict[str, Any]]:
-        accept_header = "text/event-stream" if stream else "application/json"
+        accept_header = "application/json"
         headers = {
             "Accept": accept_header,
             "User-Agent": f"mistral-client-python/{self._version}",
@@ -219,32 +218,23 @@ class MistralClient(ClientBase):
 
         self._logger.debug(f"Sending request: {method} {url} {json}")
 
+        new_json = json.copy()
+        new_json['messages'] = []
+
+        for message in json['messages']:
+            new_json["messages"].append(message.model_dump(exclude_none=True))
+
         response: Response
 
         try:
-            if stream:
-                with self._client.stream(
-                    method,
-                    url,
-                    headers=headers,
-                    json=json,
-                ) as response:
-                    self._check_streaming_response(response)
+            response = self._client.request(
+                method,
+                url,
+                headers=headers,
+                json=new_json,
+            )
 
-                    for line in response.iter_lines():
-                        json_streamed_response = self._process_line(line)
-                        if json_streamed_response:
-                            yield json_streamed_response
-
-            else:
-                response = self._client.request(
-                    method,
-                    url,
-                    headers=headers,
-                    json=json,
-                )
-
-                yield self._check_response(response)
+            yield self._check_response(response)
 
         except ConnectError as e:
             raise MistralConnectionException(str(e)) from e
@@ -263,7 +253,7 @@ class MistralClient(ClientBase):
             time.sleep(backoff)
 
             # Retry as a generator
-            for r in self._request(method, json, path, stream=stream, attempt=attempt):
+            for r in self._request(method, json, path, attempt=attempt):
                 yield r
 
     def chat(

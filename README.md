@@ -1,4 +1,7 @@
-[![](https://dcbadge.vercel.app/api/server/WCNEFsrtjw)](https://discord.gg/WCNEFsrtjw)
+[![Discord](https://dcbadge.vercel.app/api/server/WCNEFsrtjw)](https://discord.gg/WCNEFsrtjw)
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+[![License][license-shield]][license-url]
 
 <h1 align="center">Open Architect</h1>
 
@@ -35,7 +38,9 @@ Just create tickets (or have an AI architect assist you), and let the agents do 
 
 ### Other requirement
 
-We currently use OpenAI for our inferences, so you'll need an [OpenAI API key](https://platform.openai.com/api-keys) with some credits (we currently use GPT3.5 Turbo and GPT4, see pricing [here](https://openai.com/pricing#:~:text=1M%20tokens-,GPT%2D3.5%20Turbo,-GPT%2D3.5%20Turbo))
+We currently use OpenAI for our inferences, so you'll need an [OpenAI API key](https://platform.openai.com/api-keys) with some credits (we currently use GPT3.5 Turbo and GPT4, see pricing [here](https://openai.com/pricing#:~:text=1M%20tokens-,GPT%2D3.5%20Turbo,-GPT%2D3.5%20Turbo)).
+
+Then run the `init_connections.py` script and provide your key
 
    
 ## How to run
@@ -55,3 +60,10 @@ This is intended to be a collaborative project, and we'd love to take suggestion
 
 - If there is something you'd like us to work on, feel free to open an **Issue** with the adequate tag and a good description. If it's a bug, please add steps to reproduce it.
 - If you have a contribution you'd like to make: first of all, thanks! You rock! Please open a PR and we'll review it as soon as we can!
+
+[stars-shield]: https://img.shields.io/github/stars/OpenArchitectAI/open-architect?style=for-the-badge
+[stars-url]: https://github.com/OpenArchitectAI/open-architect/stargazers
+[issues-shield]: https://img.shields.io/github/issues/OpenArchitectAI/open-architect?style=for-the-badge
+[issues-url]: https://github.com/OpenArchitectAI/open-architect/issues
+[license-shield]: https://img.shields.io/github/license/OpenArchitectAI/open-architect?style=for-the-badge
+[license-url]: https://github.com/OpenArchitectAI/open-architect/blob/main/LICENSE

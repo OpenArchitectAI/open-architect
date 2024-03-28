@@ -1,7 +1,6 @@
 from dotenv import load_dotenv
 import os
 
-
 from src.helpers.github import GHHelper
 from src.helpers.trello import TrelloHelper
 
@@ -34,10 +33,9 @@ gh_helper = GHHelper(gh_api_token_reviewer, gh_repo)
 trello_helper = TrelloHelper(trello_api_key, trello_token, trello_board_id)
 
 architect = Architect(
-    "sophia",
+    "Sophia",
     gh_helper=gh_helper,
     trello_helper=trello_helper,
-    openai_key=openai_api_key,
 )
 
 architect.run()

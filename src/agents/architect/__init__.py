@@ -32,10 +32,9 @@ class ReferenceExistingCodeRequest(BaseModel):
     history: Any
 
 class Architect:
-    def __init__(self, name, gh_helper: GHHelper, trello_helper: TrelloHelper, openai_key: str):
+    def __init__(self, name, gh_helper: GHHelper, trello_helper: TrelloHelper):
         self.name = name
         self.gh_helper = gh_helper
-        self.openai_key = openai_key
         self.trello_helper = trello_helper
         self.log_name = colorize(f"[{self.name} the Architect]", bold=True, color="green")
         print(
@@ -131,7 +130,7 @@ class Architect:
             },
         ]
 
-        openai_client = OpenAI(api_key=self.openai_key)
+        openai_client = OpenAI()
 
         response = openai_client.chat.completions.create(
             model="gpt-3.5-turbo-1106",
@@ -189,7 +188,7 @@ class Architect:
             questionPrompt = f"""Given the description of the project so far {askFollowupQuestionsRequest.history} and the user's latest question {askFollowupQuestionsRequest.question}, come up with additional follow up questions to further deepen your understanding of what the user is trying to build. Ask more questions about the front end, backend, or hosting requirements. Understand the details of the product features. Ask questions until you are confident that you are able to generate a detailed execution plan for the project. The response should be a list of questions that you can ask the user to better understand the project requirements.  Limit to 2-3 questions at a time. 
             """
 
-            openai_client = OpenAI(api_key=self.openai_key)
+            openai_client = OpenAI()
             response = openai_client.chat.completions.create(
                 model="gpt-3.5-turbo-1106",
                 messages=[
@@ -226,7 +225,7 @@ class Architect:
 
             Going through your existing codebase, I would suggest that we build out _feature_ by modifying the following files _files_ and adding the following functionality to them _functionality description_. Happy to break this down into granular subtasks for you next on how I'm planning to approach this execution. 
             """
-            openai_client = OpenAI(api_key=self.openai_key)
+            openai_client = OpenAI()
 
             response = openai_client.chat.completions.create(
                 model="gpt-3.5-turbo-1106",
@@ -265,7 +264,7 @@ class Architect:
             Take each subtask and generate a title and description.  Each one should correspond with a list element in the subtask list. You need to cover all of the subtasks that are mentioned and create a ticket for each one. Each ticket should include the title and description of the subtask. The response should be a list of these json objects for each subtask.
             """
 
-            openai_client = OpenAI(api_key=self.openai_key)
+            openai_client = OpenAI()
             response = openai_client.chat.completions.create(
                 model="gpt-3.5-turbo-1106",
                 messages=[
@@ -337,7 +336,7 @@ class Architect:
             3. Title of the task
                 Detailed description of the task with a breakdown of the steps that need to be taken to complete the task
             """
-            openai_client = OpenAI(api_key=self.openai_key)
+            openai_client = OpenAI()
             response = openai_client.chat.completions.create(
                 model="gpt-3.5-turbo-1106",
                 messages=[

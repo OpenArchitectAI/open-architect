@@ -25,17 +25,17 @@ Just create tickets (or have an AI architect assist you), and let the agents do 
 
 1. Be part of the org of your repo
 2. Go to https://github.com/settings/tokens?type=beta and create a personnal access token for the repo
-3. Run the init_connections.py script and provide the URL to your repo and the access token
+3. Run the `init_connections.py` script and provide the URL to your repo and the access token
 
 ### Hot to connect to Trello
 
 1. Connect to https://trello.com/ and log in. Navigate to your target Board. Save the Board ID.
 2. Create a PowerUp for your Workspace at https://trello.com/power-ups/admin (you don't need the Iframe connector URL). Save your API Key and Secret
-3. Run the init_connections.py script and provide the needed secrets
+3. Run the `init_connections.py` script and provide the needed secrets
 
 ### Other requirement
 
-For the Architect, you'll need an [OpenAI API key](https://platform.openai.com/api-keys) with some credits (we currently use GPT3.5 Turbo with a few tokens, see pricing [here](https://openai.com/pricing#:~:text=1M%20tokens-,GPT%2D3.5%20Turbo,-GPT%2D3.5%20Turbo))
+We currently use OpenAI for our inferences, so you'll need an [OpenAI API key](https://platform.openai.com/api-keys) with some credits (we currently use GPT3.5 Turbo and GPT4, see pricing [here](https://openai.com/pricing#:~:text=1M%20tokens-,GPT%2D3.5%20Turbo,-GPT%2D3.5%20Turbo))
 
    
 ## How to run

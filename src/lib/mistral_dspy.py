@@ -1,18 +1,16 @@
-from typing import Any, Optional
+from typing import Any, List, Optional, Union
 
 import backoff
 
 from dsp.modules.lm import LM
+from pydantic import BaseModel
 
-try:
-    from mistralai.client import MistralClient
-    from mistralai.exceptions import MistralAPIException
-    from mistralai.models.chat_completion import ChatMessage
+from src.lib.ported_exceptions import MistralAPIException
+from src.lib.ported_clients import MistralClient
 
-    mistralai_api_error = MistralAPIException
-except ImportError:
-    mistralai_api_error = Exception
-
+class ChatMessage(BaseModel):
+    role: str
+    content: Union[str, List[str]]
 
 def backoff_hdlr(details):
     """Handler from https://pypi.org/project/backoff/"""
@@ -55,11 +53,6 @@ class Mistral(LM):
         """
         super().__init__(model)
 
-        if mistralai_api_error == Exception:
-            raise ImportError(
-                "Not loading Mistral AI because it is not installed. Install it with `pip install mistralai`."
-            )
-
         self.client = MistralClient(api_key=api_key)
 
         self.provider = "mistral"
@@ -100,7 +93,7 @@ class Mistral(LM):
 
     @backoff.on_exception(
         backoff.expo,
-        (mistralai_api_error),
+        MistralAPIException,
         max_time=1000,
         on_backoff=backoff_hdlr,
         giveup=giveup_hdlr,

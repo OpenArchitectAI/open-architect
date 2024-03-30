@@ -6,7 +6,7 @@ from openai import OpenAI
 import streamlit as st
 
 from src.helpers.github import GHHelper
-from src.helpers.trello import TrelloHelper
+from src.helpers.board import BoardHelper
 from src.lib.terminal import colorize
 from src.models import Ticket
 
@@ -32,10 +32,10 @@ class ReferenceExistingCodeRequest(BaseModel):
     history: Any
 
 class Architect:
-    def __init__(self, name, gh_helper: GHHelper, trello_helper: TrelloHelper):
+    def __init__(self, name, gh_helper: GHHelper, board_helper: BoardHelper):
         self.name = name
         self.gh_helper = gh_helper
-        self.trello_helper = trello_helper
+        self.board_helper = board_helper
         self.log_name = colorize(f"[{self.name} the Architect]", bold=True, color="green")
         print(
             f"{self.log_name} Nice to meet you, I'm {self.name} the Architect! I'm here to help you break down your tasks into smaller tickets and create them for you! 🏗️🔨📝"
@@ -290,7 +290,7 @@ class Architect:
                 tickets.append(ticket)
                 ticket_titles.append(ticket.title)
 
-            createdTickets = self.trello_helper.push_tickets_to_backlog_and_assign(tickets)
+            createdTickets = self.board_helper.push_tickets_to_backlog_and_assign(tickets)
 
             ticketMarkdown = generate_ticket_markdown(createdTickets)
 

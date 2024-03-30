@@ -9,14 +9,14 @@ from src.agents.reviewer import Reviewer
 
 
 def start_intern(gh_helper_intern, trello_helper):
-    intern = Intern("Alex", gh_helper=gh_helper_intern, trello_helper=trello_helper)
+    intern = Intern("Alex", gh_helper=gh_helper_intern, board_helper=trello_helper)
     intern_thread = Thread(target=intern.run)
     intern_thread.start()
 
 
 def start_reviewer(gh_helper_reviewer, trello_helper):
     reviewer = Reviewer(
-        "Charlie", gh_helper=gh_helper_reviewer, trello_helper=trello_helper
+        "Charlie", gh_helper=gh_helper_reviewer, board_helper=trello_helper
     )
     reviewer_thread = Thread(target=reviewer.run)
     reviewer_thread.start()

@@ -22,9 +22,7 @@ jobs:
       - name: Install dependencies
         run: poetry install
       - name: Run tests
-        run: python -m pytest
-        # TODO: set up Poetry's dependencies and use it with PyTest
-        # run: poetry run pytest
+        run: poetry run pytest
   code-quality:
     strategy:
       fail-fast: false

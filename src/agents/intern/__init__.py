@@ -48,7 +48,7 @@ class Intern:
         return len(next_tickets) != 0
 
     def refresh_pr_backlog(self):
-        return False # Not implemented yet
+        return False  # Not implemented yet
         print(f"[INTERN {self.name}] Looking on GitHub for reviewed PRs")
         next_prs = [
             pr

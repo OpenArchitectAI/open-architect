@@ -15,7 +15,13 @@ from src.lib.ported_exceptions import (
     MistralConnectionException,
     MistralException,
 )
-from src.lib.mistral_chat_completion import ChatCompletionResponse, ChatMessage, Function, ResponseFormat, ToolChoice
+from src.lib.mistral_chat_completion import (
+    ChatCompletionResponse,
+    ChatMessage,
+    Function,
+    ResponseFormat,
+    ToolChoice,
+)
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)s %(name)s: %(message)s",
@@ -25,6 +31,7 @@ logging.basicConfig(
 RETRY_STATUS_CODES = {429, 500, 502, 503, 504}
 
 ENDPOINT = "https://api.mistral.ai"
+
 
 class ClientBase(ABC):
     def __init__(
@@ -55,7 +62,9 @@ class ClientBase(ABC):
                 parsed_function = {}
                 parsed_function["type"] = tool["type"]
                 if isinstance(tool["function"], Function):
-                    parsed_function["function"] = tool["function"].model_dump(exclude_none=True)
+                    parsed_function["function"] = tool["function"].model_dump(
+                        exclude_none=True
+                    )
                 else:
                     parsed_function["function"] = tool["function"]
 
@@ -68,7 +77,9 @@ class ClientBase(ABC):
             return tool_choice.value
         return tool_choice
 
-    def _parse_response_format(self, response_format: Union[Dict[str, Any], ResponseFormat]) -> Dict[str, Any]:
+    def _parse_response_format(
+        self, response_format: Union[Dict[str, Any], ResponseFormat]
+    ) -> Dict[str, Any]:
         if isinstance(response_format, ResponseFormat):
             return response_format.model_dump(exclude_none=True)
         return response_format
@@ -125,7 +136,9 @@ class ClientBase(ABC):
         if tool_choice is not None:
             request_data["tool_choice"] = self._parse_tool_choice(tool_choice)
         if response_format is not None:
-            request_data["response_format"] = self._parse_response_format(response_format)
+            request_data["response_format"] = self._parse_response_format(
+                response_format
+            )
 
         self._logger.debug(f"Chat request: {request_data}")
 
@@ -155,7 +168,9 @@ class MistralClient(ClientBase):
         super().__init__(endpoint, api_key, max_retries, timeout)
 
         self._client = Client(
-            follow_redirects=True, timeout=self._timeout, transport=HTTPTransport(retries=self._max_retries)
+            follow_redirects=True,
+            timeout=self._timeout,
+            transport=HTTPTransport(retries=self._max_retries),
         )
 
     def __del__(self) -> None:
@@ -219,9 +234,9 @@ class MistralClient(ClientBase):
         self._logger.debug(f"Sending request: {method} {url} {json}")
 
         new_json = json.copy()
-        new_json['messages'] = []
+        new_json["messages"] = []
 
-        for message in json['messages']:
+        for message in json["messages"]:
             new_json["messages"].append(message.model_dump(exclude_none=True))
 
         response: Response
@@ -239,7 +254,9 @@ class MistralClient(ClientBase):
         except ConnectError as e:
             raise MistralConnectionException(str(e)) from e
         except RequestError as e:
-            raise MistralException(f"Unexpected exception ({e.__class__.__name__}): {e}") from e
+            raise MistralException(
+                f"Unexpected exception ({e.__class__.__name__}): {e}"
+            ) from e
         except JSONDecodeError as e:
             raise MistralAPIException.from_response(
                 response,
@@ -248,7 +265,9 @@ class MistralClient(ClientBase):
         except MistralAPIStatusException as e:
             attempt += 1
             if attempt > self._max_retries:
-                raise MistralAPIStatusException.from_response(response, message=str(e)) from e
+                raise MistralAPIStatusException.from_response(
+                    response, message=str(e)
+                ) from e
             backoff = 2.0**attempt  # exponential backoff
             time.sleep(backoff)
 

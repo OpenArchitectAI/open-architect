@@ -47,8 +47,10 @@ class MistralAPIException(MistralException):
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(message={str(self)}, http_status={self.http_status})"
 
+
 class MistralAPIStatusException(MistralAPIException):
     """Returned when we receive a non-200 response from the API that we should retry"""
+
 
 class MistralConnectionException(MistralException):
     """Returned when the SDK can not reach the API server for any reason"""

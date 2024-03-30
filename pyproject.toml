@@ -30,6 +30,9 @@ packages = [
 python = ">=3.8"
 pytest = ">=8.0.0"
 
+[tool.poetry.group.dev.dependencies]
+black = "^24.3.0"
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"

@@ -13,7 +13,19 @@ HEADERS = {
     "Content-Type": "application/json",
 }
 
-COLORS = ["green", "yellow", "orange", "red", "purple", "blue", "sky", "lime", "pink", "black"]
+COLORS = [
+    "green",
+    "yellow",
+    "orange",
+    "red",
+    "purple",
+    "blue",
+    "sky",
+    "lime",
+    "pink",
+    "black",
+]
+
 
 class CustomTrelloClient(TrelloClient):
     # Patch, because the base one is not working
@@ -167,7 +179,9 @@ class TrelloHelper:
         return [label.id for label in self.client.get_board(self.board_id).get_labels()]
 
     def create_intern(self, name):
-        label = self.client.get_board(self.board_id).add_label(name, color=choice(COLORS))
+        label = self.client.get_board(self.board_id).add_label(
+            name, color=choice(COLORS)
+        )
         return label.id
 
     # TESTING METHODS
@@ -177,7 +191,9 @@ class TrelloHelper:
         ticket.change_list(self.list_ids[TicketStatus.TODO.value])
 
     def get_last_ticket(self):
-        return self.client.get_list(self.list_ids[TicketStatus.BACKLOG.value]).list_cards()[-1]
+        return self.client.get_list(
+            self.list_ids[TicketStatus.BACKLOG.value]
+        ).list_cards()[-1]
 
     def delete_ticket(self, ticket_id):
         self.client.get_board(self.board_id).get_card(ticket_id).delete()

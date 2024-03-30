@@ -3,10 +3,12 @@ from typing import List, Optional, Union
 
 from pydantic import BaseModel
 
+
 class UsageInfo(BaseModel):
     prompt_tokens: int
     total_tokens: int
     completion_tokens: Optional[int]
+
 
 class Function(BaseModel):
     name: str

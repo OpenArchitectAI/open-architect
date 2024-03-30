@@ -8,9 +8,11 @@ from pydantic import BaseModel
 from src.lib.ported_exceptions import MistralAPIException
 from src.lib.ported_clients import MistralClient
 
+
 class ChatMessage(BaseModel):
     role: str
     content: Union[str, List[str]]
+
 
 def backoff_hdlr(details):
     """Handler from https://pypi.org/project/backoff/"""

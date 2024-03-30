@@ -15,28 +15,35 @@ class ArchitectAgentRequest(BaseModel):
     question: str
     history: Any
 
+
 class CreateTicketsRequest(BaseModel):
     question: str
     history: Any
+
 
 class CreateSubtasksRequest(BaseModel):
     question: str
     history: Any
 
+
 class AskFollowupQuestionsRequest(BaseModel):
-    question: str 
+    question: str
     history: Any
+
 
 class ReferenceExistingCodeRequest(BaseModel):
     question: str
     history: Any
+
 
 class Architect:
     def __init__(self, name, gh_helper: GHHelper, trello_helper: TrelloHelper):
         self.name = name
         self.gh_helper = gh_helper
         self.trello_helper = trello_helper
-        self.log_name = colorize(f"[{self.name} the Architect]", bold=True, color="green")
+        self.log_name = colorize(
+            f"[{self.name} the Architect]", bold=True, color="green"
+        )
         print(
             f"{self.log_name} Nice to meet you, I'm {self.name} the Architect! I'm here to help you break down your tasks into smaller tickets and create them for you! 🏗️🔨📝"
         )
@@ -47,7 +54,14 @@ class Architect:
 
         if "messages" not in st.session_state:
             st.session_state.messages = []
-            st.session_state.messages.append({"role": "assistant", "content": "Hey! What new features would you like to add to your project " + str(self.gh_helper.repo.full_name) + " today?  I'll help you break it down to subtasks, figure out how to integrate with your existing code and then set my crew of SWE agents to get it built out for you!"})
+            st.session_state.messages.append(
+                {
+                    "role": "assistant",
+                    "content": "Hey! What new features would you like to add to your project "
+                    + str(self.gh_helper.repo.full_name)
+                    + " today?  I'll help you break it down to subtasks, figure out how to integrate with your existing code and then set my crew of SWE agents to get it built out for you!",
+                }
+            )
 
         for message in st.session_state.messages:
             with st.chat_message(message["role"]):
@@ -61,10 +75,7 @@ class Architect:
             with st.chat_message("assistant"):
                 architectureAgentReq = ArchitectAgentRequest(
                     question=prompt,
-                    history=[
-                        msg["content"]
-                        for msg in st.session_state.messages
-                    ],
+                    history=[msg["content"] for msg in st.session_state.messages],
                 )
                 response = self.compute_response(architectureAgentReq)
                 res = st.write(response)
@@ -76,7 +87,9 @@ class Architect:
         Routing logic for all tools supported by the feedback agent.
         """
         messages = [
-            {"role": "system", "content": f"""You are a principal software engineer who is responsible for mentoring engineers and breaking down tasks into smaller tickets. 
+            {
+                "role": "system",
+                "content": f"""You are a principal software engineer who is responsible for mentoring engineers and breaking down tasks into smaller tickets. 
                 
             Reference the existing codebase to determine how to build the features in the existing code.
             
@@ -92,8 +105,13 @@ class Architect:
             - if there are references to their existing code, create subtasks
             - if there are subtasks, ask to create tasks  
 
-            """},
-            {"role": "user", "content": f"address the user's question: {architectAgentRequest.question}"}]
+            """,
+            },
+            {
+                "role": "user",
+                "content": f"address the user's question: {architectAgentRequest.question}",
+            },
+        ]
 
         tools = [
             # {
@@ -126,7 +144,7 @@ class Architect:
                     "name": "reference_existing_code",
                     "description": "If the user asks to implement in their codebase. Go through the existing code in order to better understand how to build the requested user feature in the codebase. Analyze the code files, and determine the best way to build out support for the new features in the existing code. ",
                     "parameters": {"type": "object", "properties": {}, "required": []},
-                }
+                },
             },
         ]
 
@@ -156,7 +174,7 @@ class Architect:
             "reference_existing_code": ReferenceExistingCodeRequest(
                 question=architectAgentRequest.question,
                 history=architectAgentRequest.history,
-            )
+            ),
         }
 
         if tool_calls:
@@ -175,14 +193,15 @@ class Architect:
                 function_args = function_request_mapping[function_name]
                 print("Function args are: " + str(function_args))
             return function_to_call(function_args)
-        
+
         print("returning message: " + str(response_message.content))
         return response_message.content
 
-
-    def ask_followup_questions(self, askFollowupQuestionsRequest: AskFollowupQuestionsRequest):
+    def ask_followup_questions(
+        self, askFollowupQuestionsRequest: AskFollowupQuestionsRequest
+    ):
         """
-            This function will be responsible for asking follow up questions to better understand what the user wants to build.
+        This function will be responsible for asking follow up questions to better understand what the user wants to build.
         """
         try:
             questionPrompt = f"""Given the description of the project so far {askFollowupQuestionsRequest.history} and the user's latest question {askFollowupQuestionsRequest.question}, come up with additional follow up questions to further deepen your understanding of what the user is trying to build. Ask more questions about the front end, backend, or hosting requirements. Understand the details of the product features. Ask questions until you are confident that you are able to generate a detailed execution plan for the project. The response should be a list of questions that you can ask the user to better understand the project requirements.  Limit to 2-3 questions at a time. 
@@ -207,17 +226,18 @@ class Architect:
             print("Failed to generate subtasks with error " + str(e))
             return "Failed to generate subtasks with error " + str(e)
 
-
-    def reference_existing_code(self, referenceExistingCodeRequest: ReferenceExistingCodeRequest):
+    def reference_existing_code(
+        self, referenceExistingCodeRequest: ReferenceExistingCodeRequest
+    ):
         """
-            This method should take the user's question and search the current codebase for all references to that question. It should then summarize the current code and how the user's request can be built within that codebase.
+        This method should take the user's question and search the current codebase for all references to that question. It should then summarize the current code and how the user's request can be built within that codebase.
         """
         # First get the codebase dict
         codebase_dict = self.gh_helper.get_entire_codebase()
 
         # Now search the codebase for the user's question
         codebase = codebase_dict.files
-        
+
         try:
             questionPrompt = f"""Given the description of the project so far {referenceExistingCodeRequest.history} and the user's latest question {referenceExistingCodeRequest.question}, figure out which files in the codebase are most relevant for the user in order to best design a solution to the feature requests. You have this codebase to reference {codebase}. If the feature is completely irrelevant to the user's existing code, let the user know that the feature request seems to be unrelated to the existing codebase and ask them to verify if they do indeed want to build that feature in the current codebase.
             
@@ -244,7 +264,7 @@ class Architect:
         except Exception as e:
             print("Failed to generate subtasks with error " + str(e))
             return "Failed to generate subtasks with error " + str(e)
-    
+
     def create_tasks(self, createTicketsRequest: CreateTicketsRequest):
         """
         This function will be responsible for creating multiple tickets in parallel.
@@ -274,8 +294,7 @@ class Architect:
                     },
                     {"role": "user", "content": questionPrompt},
                 ],
-
-                response_format={ "type": "json_object" }
+                response_format={"type": "json_object"},
             )
 
             subtasks = response.choices[0].message.content
@@ -286,16 +305,23 @@ class Architect:
             tickets = []
             ticket_titles = []
             for subtask in subtask_json:
-                ticket = Ticket(title=subtask["title"], description=subtask["description"])
+                ticket = Ticket(
+                    title=subtask["title"], description=subtask["description"]
+                )
                 tickets.append(ticket)
                 ticket_titles.append(ticket.title)
 
-            createdTickets = self.trello_helper.push_tickets_to_backlog_and_assign(tickets)
+            createdTickets = self.trello_helper.push_tickets_to_backlog_and_assign(
+                tickets
+            )
 
             ticketMarkdown = generate_ticket_markdown(createdTickets)
 
-            return "Great! I've just created the following tickets and assigned them to our agents to get started on immediately \n" + ticketMarkdown
-        
+            return (
+                "Great! I've just created the following tickets and assigned them to our agents to get started on immediately \n"
+                + ticketMarkdown
+            )
+
             # response = client.chat.completions.create(
             #     model="gpt-3.5-turbo-1106",
             #     messages=[
@@ -311,11 +337,11 @@ class Architect:
             # )
             # finalResponse = response.choices[0].message.content
             # return finalResponse
-        
+
         except Exception as e:
             print("Failed to generate subtasks with error " + str(e))
             return "Failed to generate subtasks with error " + str(e)
-        
+
     # Define the tool for breaking up the overall project description into multiple smaller tasks and then getting user feedback on them
     def create_subtasks(self, project_description):
         """
@@ -359,5 +385,3 @@ def generate_ticket_markdown(tickets: List[Ticket]):
     for ticket in tickets:
         markdown += f"- **{ticket.title}**: {ticket.description}\n"
     return markdown
-    
-    

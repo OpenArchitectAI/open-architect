@@ -35,7 +35,7 @@ trello_helper = TrelloHelper(trello_api_key, trello_token, trello_board_id)
 architect = Architect(
     "Sophia",
     gh_helper=gh_helper,
-    trello_helper=trello_helper,
+    board_helper=trello_helper,
 )
 
 architect.run()

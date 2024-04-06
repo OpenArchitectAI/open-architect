@@ -35,11 +35,11 @@ gh_helper_intern = GHHelper(gh_api_token_intern, gh_repo)
 gh_helper_reviewer = GHHelper(gh_api_token_reviewer, gh_repo)
 trello_helper = TrelloHelper(trello_api_key, trello_token, trello_board_id)
 
-intern = Intern("alex", gh_helper=gh_helper_intern, trello_helper=trello_helper)
+intern = Intern("alex", gh_helper=gh_helper_intern, board_helper=trello_helper)
 reviewer = Reviewer(
     "charlie",
     gh_helper=gh_helper_reviewer,
-    trello_helper=trello_helper,
+    board_helper=trello_helper,
 )
 
 intern_thread = Thread(target=intern.run)

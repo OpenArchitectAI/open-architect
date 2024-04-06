@@ -5,6 +5,7 @@ import requests
 
 from trello import TrelloClient
 
+from src.helpers.board import BoardHelper
 from src.constants import TicketStatus
 from src.models import Ticket
 
@@ -66,7 +67,7 @@ class CustomTrelloClient(TrelloClient):
         return response.json()
 
 
-class TrelloHelper:
+class TrelloHelper(BoardHelper):
     def __init__(self, trello_api_key, trello_token, trello_board_id):
         self.client = CustomTrelloClient(
             api_key=trello_api_key,

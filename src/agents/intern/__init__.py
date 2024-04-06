@@ -7,7 +7,7 @@ from src.lib.terminal import colorize
 from src.agents.intern.processors import better_code_change, generate_code_change
 from src.models import Ticket
 from src.helpers.github import GHHelper
-from src.helpers.trello import TrelloHelper
+from src.helpers.board import BoardHelper
 
 REFRESH_EVERY = 5
 PROCESS_EVERY = 5
@@ -16,13 +16,13 @@ MAX_PROCESS_CYCLES_WITHOUT_WORK = 10000
 
 
 class Intern:
-    def __init__(self, name, gh_helper: GHHelper, trello_helper: TrelloHelper):
+    def __init__(self, name, gh_helper: GHHelper, board_helper: BoardHelper):
         self.name = name
-        self.id = choice(trello_helper.get_intern_list())
+        self.id = choice(board_helper.get_intern_list())
         self.ticket_todo_list: List[Ticket] = []
         self.pr_backlog = []
         self.gh_helper = gh_helper
-        self.trello_helper = trello_helper
+        self.board_helper = board_helper
         self.fetch_thread = Thread(target=self.refresh_loop)
         self.process_thread = Thread(target=self.process_loop)
         self.log_name = colorize(f"[{self.name} the intern]", bold=True, color="red")
@@ -41,7 +41,7 @@ class Intern:
         # print(f"[INTERN {self.name}] Looking on Trello for new assigned tickets")
         next_tickets = [
             t
-            for t in self.trello_helper.get_tickets_todo_list()
+            for t in self.board_helper.get_tickets_todo_list()
             if t not in self.ticket_todo_list
         ]
         self.ticket_todo_list.extend(next_tickets)
@@ -60,13 +60,13 @@ class Intern:
 
     def process_pr(self):
         pr = self.pr_backlog.pop(0)
-        self.trello_helper.move_to_wip(pr.ticket_id)
+        self.board_helper.move_to_wip(pr.ticket_id)
         comment = self.gh_helper.get_comments(pr)
         # Do some processing with LLMs, create a new code_change
         code_change = generate_code_change("", comment)
         self.gh_helper.push_changes(code_change, pr.ticket_id, pr.assignee_id)
         print(f"[{self.log_name}] Moving card to waiting for review")
-        self.trello_helper.move_to_waiting_for_review(pr.ticket_id)
+        self.board_helper.move_to_waiting_for_review(pr.ticket_id)
 
     def process_ticket(self):
         # Get the first ticket from the backlog
@@ -76,7 +76,7 @@ class Intern:
         print(f'{self.log_name} Starting to work on ticket "{ticket.title:.30}..."')
 
         # Move ticket to WIP
-        self.trello_helper.move_to_wip(ticket.id)
+        self.board_helper.move_to_wip(ticket.id)
 
         # There should not be some PRs already assigned to this ticket (for now)
         # Call an agent to create a PR
@@ -96,7 +96,7 @@ class Intern:
             author_id=ticket.assignee_id,
         )
 
-        self.trello_helper.move_to_waiting_for_review(ticket_id=ticket.id)
+        self.board_helper.move_to_waiting_for_review(ticket_id=ticket.id)
         print(f"{self.log_name} PR Created! Feel free to review it!")
 
     def refresh_loop(self):

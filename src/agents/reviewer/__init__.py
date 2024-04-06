@@ -5,16 +5,16 @@ from src.lib.terminal import colorize
 from src.agents.reviewer.generators.code_review_generator import GeneratedCodeReview
 from src.agents.reviewer.processors import review_code
 from src.models import PR
-from src.helpers.trello import TrelloHelper
+from src.helpers.board import BoardHelper
 from src.helpers.github import GHHelper
 
 
 class Reviewer:
-    def __init__(self, name, gh_helper: GHHelper, trello_helper: TrelloHelper):
+    def __init__(self, name, gh_helper: GHHelper, board_helper: BoardHelper):
         self.name = name
         self.pr_backlog: List[PR] = []
         self.gh_helper = gh_helper
-        self.trello_helper = trello_helper
+        self.board_helper = board_helper
         self.log_name = colorize(f"[{self.name} the reviewer]", bold=True, color="cyan")
         print(
             f"{self.log_name} Hi, my name is {self.name} and I'm an experienced code reviewer. I'm ready to review some bad code 🧐."
@@ -65,9 +65,9 @@ class Reviewer:
             generated_code_review.is_valid_code
             and generated_code_review.resolves_ticket
         ):
-            self.trello_helper.move_to_approved(ticket_id=trello_ticket_id)
+            self.board_helper.move_to_approved(ticket_id=trello_ticket_id)
         else:
-            self.trello_helper.move_to_reviewed(ticket_id=trello_ticket_id)
+            self.board_helper.move_to_reviewed(ticket_id=trello_ticket_id)
 
     def process_pr(self):
         codebase = self.gh_helper.get_entire_codebase()
@@ -76,7 +76,7 @@ class Reviewer:
         pr = self.pr_backlog.pop(0)
 
         # Fetch the Trello ticket that corresponds to this PR
-        ticket = self.trello_helper.get_ticket(ticket_id=pr.ticket_id)
+        ticket = self.board_helper.get_ticket(ticket_id=pr.ticket_id)
 
         print(
             f'{self.log_name} I am reviewing the PR for this ticket: "{ticket.title:.30}..."'

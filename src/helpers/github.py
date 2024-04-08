@@ -151,19 +151,26 @@ class GHHelper:
         )
 
     def get_entire_codebase(self) -> Codebase:
+        codebase_dict = {}
         contents = self.repo.get_contents("")
         if not isinstance(contents, list):
             contents = [contents]
 
-        codebase_dict = {}
-        for file in contents:
-            try:
-                codebase_dict[file.path] = file.decoded_content.decode("utf-8")
-            except Exception as e:
-                pass
+        def process_contents(contents, path=""):
+            for item in contents:
+                if item.type == "dir":
+                    dir_contents = self.repo.get_contents(item.path)
+                    process_contents(dir_contents, path + item.name + "/")
+                elif item.type == "file":
+                    try:
+                        codebase_dict[path + item.name] = item.decoded_content.decode(
+                            "utf-8"
+                        )
+                    except Exception as e:
+                        pass
 
+        process_contents(contents)
         codebase = Codebase(files=codebase_dict)
-
         return codebase
 
     def get_file_content(self, file):

@@ -1,5 +1,5 @@
-from src.agents.intern.generators.diff_generator import DiffGenerator
-from src.language_models import gpt4, mistral
+from src.agents.intern.generators.code_generator import CodeGenerator
+from src.language_models import gpt4
 import dspy
 
 from src.models import Codebase, Ticket
@@ -22,8 +22,8 @@ def generate_code_change(ticket: Ticket, code_base: Codebase):
     # and will return a new code_change
     dspy.configure(lm=gpt4)
 
-    diff_generator = DiffGenerator()
+    diff_generator = CodeGenerator()
 
-    new_files, explanations = diff_generator(code_base, ticket)
+    res = diff_generator(code_base, ticket)
 
-    return new_files, explanations
+    return res["new_files"], res["explanations"]

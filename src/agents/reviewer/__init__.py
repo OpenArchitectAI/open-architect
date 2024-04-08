@@ -75,6 +75,10 @@ class Reviewer:
         # Get first open PR from GH that hasn't been approved yet
         pr = self.pr_backlog.pop(0)
 
+        if pr.ticket_id is None:
+            # This PR is not associated with a Trello ticket
+            return
+
         # Fetch the Trello ticket that corresponds to this PR
         ticket = self.board_helper.get_ticket(ticket_id=pr.ticket_id)
 

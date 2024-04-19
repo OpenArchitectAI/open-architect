@@ -1,0 +1,1 @@
+{"id":null,"title":"Update init_connections.py to Read Centralized Config","description":"Modify the `init_connections.py` file to read the centralized config from the `.env` file and utilize it for initializing connections with GitHub, Trello, and OpenAI.","status":null,"assignee_id":null}

@@ -1,0 +1,1 @@
+{"id":null,"title":"Create Configuration Variables in .env.example","description":"Add configuration variables for model params and model ID for the agents to the `.env.example` file in order to centralize the configuration.","status":null,"assignee_id":null}

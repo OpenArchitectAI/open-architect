@@ -32,7 +32,7 @@ class CustomTrelloClient(TrelloClient):
             "idList": list_id,
             "idLabels": [label_id],
         }
-        res = requests.post(url, headers=HEADERS, params=query_params)
+        res = requests.post(url, headers=HEADERS, params=query_params, timeout=30)
         # print("Response from adding card to trello board: " + str(res.json()))
 
     def fetch_json(
